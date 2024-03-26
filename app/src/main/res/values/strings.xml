@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Home Security</string>
+    <string name="title_home">Home</string>
+    <string name="title_home_up">Nome Casa</string>
+    <string name="title_settings">Settings</string>
+    <string name="title_record">Record</string>
+    <string name="title_smartobj">Smart Objects</string>
+    <string name="title_routine">Routine</string>
+    <string name="btn_alarm">ON</string>
+    <string name="home_name">Nome Casa</string>
+    <string name="whose_at_home">CHI È A CASA:</string>
+    <string name="last_record">VEDI ULTIMI RECORD:</string>
+    <string name="btn_alarm_text">allarme spento</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">Log In</string>
+    <string name="to_register">Non hai un account? Registrati</string>
+    <string name="smartobj">Smart Objects Proprietari</string>
+    <string name="other_smartobj">Altri Smart Objects</string>
+    <string name="add">add smart object</string>
+</resources>
