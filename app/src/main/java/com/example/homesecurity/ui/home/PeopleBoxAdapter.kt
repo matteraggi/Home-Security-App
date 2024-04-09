@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.homesecurity.R
 
-class PeopleBoxAdapter(private val context: Context, private val boxList: List<PeopleBox>) :
+class PeopleBoxAdapter(private val context: Context, private val boxList: MutableList<PeopleBox>) :
     RecyclerView.Adapter<PeopleBoxAdapter.BoxViewHolder>() {
 
     inner class BoxViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -18,12 +18,15 @@ class PeopleBoxAdapter(private val context: Context, private val boxList: List<P
         val textView: TextView = itemView.findViewById(R.id.textView)
     }
 
+    // invocato qunado un nuovo elemento deve essere mostrato. parent è il container vuoto
+    // riservato per l'elemento
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BoxViewHolder {
         val itemView = LayoutInflater.from(parent.context)
             .inflate(R.layout.people_box, parent, false)
         return BoxViewHolder(itemView)
     }
 
+    // popolare i campi del nuovo elemento
     override fun onBindViewHolder(holder: BoxViewHolder, position: Int) {
         val currentItem = boxList[position]
         holder.textView.text = currentItem.name
@@ -34,4 +37,11 @@ class PeopleBoxAdapter(private val context: Context, private val boxList: List<P
     }
 
     override fun getItemCount() = boxList.size
+
+    //forse non serve:
+
+    fun addPerson(newPerson: PeopleBox){
+        boxList.add(newPerson);
+        notifyItemInserted(boxList.size - 1);
+    }
 }

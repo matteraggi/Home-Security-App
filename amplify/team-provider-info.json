@@ -1,0 +1,23 @@
+{
+  "staging": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-homesecurity-staging-93aac-authRole",
+      "UnauthRoleArn": "arn:aws:iam::905418007634:role/amplify-homesecurity-staging-93aac-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::905418007634:role/amplify-homesecurity-staging-93aac-authRole",
+      "Region": "eu-west-3",
+      "DeploymentBucketName": "amplify-homesecurity-staging-93aac-deployment",
+      "UnauthRoleName": "amplify-homesecurity-staging-93aac-unauthRole",
+      "StackName": "amplify-homesecurity-staging-93aac",
+      "StackId": "arn:aws:cloudformation:eu-west-3:905418007634:stack/amplify-homesecurity-staging-93aac/eef58d90-f684-11ee-aa10-0e9bfcba1d37",
+      "AmplifyAppId": "d3avzbag4i0ymh"
+    },
+    "categories": {
+      "api": {
+        "homesecurity": {}
+      },
+      "auth": {
+        "HomeSecurity": {}
+      }
+    }
+  }
+}

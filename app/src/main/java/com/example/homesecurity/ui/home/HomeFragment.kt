@@ -9,15 +9,13 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.homesecurity.R
 import com.example.homesecurity.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val peopleBoxList = listOf<PeopleBox>(PeopleBox("matteo", "image/matteo", "il migliore"), PeopleBox("valentina", "image/valentina", "sorella"), PeopleBox("madre", "image/madre", "mia madre"), PeopleBox("padre", "image/padre", "mio padre"))
-
+    private val peopleBoxList = mutableListOf<PeopleBox>(PeopleBox("matteo", "image/matteo", "il migliore"), PeopleBox("valentina", "image/valentina", "sorella"), PeopleBox("madre", "image/madre", "mia madre"), PeopleBox("padre", "image/padre", "mio padre"))
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,9 +30,7 @@ class HomeFragment : Fragment() {
 
         // Prendo il RecyclerView dal layout
         val peopleRecyclerView: RecyclerView = binding.recyclerViewPeople
-
-        //imposto il layout manager per la recycler view (può essere linearlayout o gridlayout o altro)
-        peopleRecyclerView.layoutManager = LinearLayoutManager(context)
+        peopleRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
         //creo un'istanza dell'adapter e ci collego il recyclerview
         val peopleAdapter = PeopleBoxAdapter(requireContext(), peopleBoxList)

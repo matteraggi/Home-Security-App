@@ -1,0 +1,119 @@
+# this is an auto generated file. This will be overwritten
+
+query GetDevice($id: ID!) {
+  getDevice(id: $id) {
+    id
+    alarm
+    homeUsers {
+      nextToken
+      __typename
+    }
+    recordInfo {
+      nextToken
+      __typename
+    }
+    homeId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+
+query ListDevices(
+  $filter: ModelDeviceFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listDevices(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+
+query GetHomeUser($id: ID!) {
+  getHomeUser(id: $id) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    field
+    value
+    createdAt
+    updatedAt
+    deviceHomeUsersId
+    __typename
+  }
+}
+
+query ListHomeUsers(
+  $filter: ModelHomeUserFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listHomeUsers(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      field
+      value
+      createdAt
+      updatedAt
+      deviceHomeUsersId
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+
+query GetRecordInfo($id: ID!) {
+  getRecordInfo(id: $id) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    timestamp
+    data
+    createdAt
+    updatedAt
+    deviceRecordInfoId
+    __typename
+  }
+}
+
+query ListRecordInfos(
+  $filter: ModelRecordInfoFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listRecordInfos(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      timestamp
+      data
+      createdAt
+      updatedAt
+      deviceRecordInfoId
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}

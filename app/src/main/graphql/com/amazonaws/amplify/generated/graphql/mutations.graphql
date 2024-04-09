@@ -1,0 +1,205 @@
+# this is an auto generated file. This will be overwritten
+
+mutation CreateDevice(
+  $input: CreateDeviceInput!
+  $condition: ModelDeviceConditionInput
+) {
+  createDevice(input: $input, condition: $condition) {
+    id
+    alarm
+    homeUsers {
+      nextToken
+      __typename
+    }
+    recordInfo {
+      nextToken
+      __typename
+    }
+    homeId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+
+mutation UpdateDevice(
+  $input: UpdateDeviceInput!
+  $condition: ModelDeviceConditionInput
+) {
+  updateDevice(input: $input, condition: $condition) {
+    id
+    alarm
+    homeUsers {
+      nextToken
+      __typename
+    }
+    recordInfo {
+      nextToken
+      __typename
+    }
+    homeId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+
+mutation DeleteDevice(
+  $input: DeleteDeviceInput!
+  $condition: ModelDeviceConditionInput
+) {
+  deleteDevice(input: $input, condition: $condition) {
+    id
+    alarm
+    homeUsers {
+      nextToken
+      __typename
+    }
+    recordInfo {
+      nextToken
+      __typename
+    }
+    homeId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+
+mutation CreateHomeUser(
+  $input: CreateHomeUserInput!
+  $condition: ModelHomeUserConditionInput
+) {
+  createHomeUser(input: $input, condition: $condition) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    field
+    value
+    createdAt
+    updatedAt
+    deviceHomeUsersId
+    __typename
+  }
+}
+
+mutation UpdateHomeUser(
+  $input: UpdateHomeUserInput!
+  $condition: ModelHomeUserConditionInput
+) {
+  updateHomeUser(input: $input, condition: $condition) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    field
+    value
+    createdAt
+    updatedAt
+    deviceHomeUsersId
+    __typename
+  }
+}
+
+mutation DeleteHomeUser(
+  $input: DeleteHomeUserInput!
+  $condition: ModelHomeUserConditionInput
+) {
+  deleteHomeUser(input: $input, condition: $condition) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    field
+    value
+    createdAt
+    updatedAt
+    deviceHomeUsersId
+    __typename
+  }
+}
+
+mutation CreateRecordInfo(
+  $input: CreateRecordInfoInput!
+  $condition: ModelRecordInfoConditionInput
+) {
+  createRecordInfo(input: $input, condition: $condition) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    timestamp
+    data
+    createdAt
+    updatedAt
+    deviceRecordInfoId
+    __typename
+  }
+}
+
+mutation UpdateRecordInfo(
+  $input: UpdateRecordInfoInput!
+  $condition: ModelRecordInfoConditionInput
+) {
+  updateRecordInfo(input: $input, condition: $condition) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    timestamp
+    data
+    createdAt
+    updatedAt
+    deviceRecordInfoId
+    __typename
+  }
+}
+
+mutation DeleteRecordInfo(
+  $input: DeleteRecordInfoInput!
+  $condition: ModelRecordInfoConditionInput
+) {
+  deleteRecordInfo(input: $input, condition: $condition) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    timestamp
+    data
+    createdAt
+    updatedAt
+    deviceRecordInfoId
+    __typename
+  }
+}

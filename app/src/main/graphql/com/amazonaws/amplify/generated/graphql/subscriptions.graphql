@@ -1,0 +1,184 @@
+# this is an auto generated file. This will be overwritten
+
+subscription OnCreateDevice($filter: ModelSubscriptionDeviceFilterInput) {
+  onCreateDevice(filter: $filter) {
+    id
+    alarm
+    homeUsers {
+      nextToken
+      __typename
+    }
+    recordInfo {
+      nextToken
+      __typename
+    }
+    homeId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+
+subscription OnUpdateDevice($filter: ModelSubscriptionDeviceFilterInput) {
+  onUpdateDevice(filter: $filter) {
+    id
+    alarm
+    homeUsers {
+      nextToken
+      __typename
+    }
+    recordInfo {
+      nextToken
+      __typename
+    }
+    homeId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+
+subscription OnDeleteDevice($filter: ModelSubscriptionDeviceFilterInput) {
+  onDeleteDevice(filter: $filter) {
+    id
+    alarm
+    homeUsers {
+      nextToken
+      __typename
+    }
+    recordInfo {
+      nextToken
+      __typename
+    }
+    homeId
+    createdAt
+    updatedAt
+    __typename
+  }
+}
+
+subscription OnCreateHomeUser($filter: ModelSubscriptionHomeUserFilterInput) {
+  onCreateHomeUser(filter: $filter) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    field
+    value
+    createdAt
+    updatedAt
+    deviceHomeUsersId
+    __typename
+  }
+}
+
+subscription OnUpdateHomeUser($filter: ModelSubscriptionHomeUserFilterInput) {
+  onUpdateHomeUser(filter: $filter) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    field
+    value
+    createdAt
+    updatedAt
+    deviceHomeUsersId
+    __typename
+  }
+}
+
+subscription OnDeleteHomeUser($filter: ModelSubscriptionHomeUserFilterInput) {
+  onDeleteHomeUser(filter: $filter) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    field
+    value
+    createdAt
+    updatedAt
+    deviceHomeUsersId
+    __typename
+  }
+}
+
+subscription OnCreateRecordInfo(
+  $filter: ModelSubscriptionRecordInfoFilterInput
+) {
+  onCreateRecordInfo(filter: $filter) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    timestamp
+    data
+    createdAt
+    updatedAt
+    deviceRecordInfoId
+    __typename
+  }
+}
+
+subscription OnUpdateRecordInfo(
+  $filter: ModelSubscriptionRecordInfoFilterInput
+) {
+  onUpdateRecordInfo(filter: $filter) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    timestamp
+    data
+    createdAt
+    updatedAt
+    deviceRecordInfoId
+    __typename
+  }
+}
+
+subscription OnDeleteRecordInfo(
+  $filter: ModelSubscriptionRecordInfoFilterInput
+) {
+  onDeleteRecordInfo(filter: $filter) {
+    id
+    device {
+      id
+      alarm
+      homeId
+      createdAt
+      updatedAt
+      __typename
+    }
+    timestamp
+    data
+    createdAt
+    updatedAt
+    deviceRecordInfoId
+    __typename
+  }
+}
