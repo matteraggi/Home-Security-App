@@ -1,20 +1,26 @@
 package com.example.homesecurity
 
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.material.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.colorResource
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.amplifyframework.ui.authenticator.SignedInState
 
 @Composable
-fun MainScreen() {
+fun MainScreen(state: SignedInState) {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = { BottomBar(navController = navController) }
@@ -35,7 +41,7 @@ fun BottomBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    BottomNavigation( backgroundColor = colorResource(id = R.color.white)
+    NavigationBar( containerColor = colorResource(id = R.color.white)
     ) {
         screens.forEach { screen ->
             AddItem(
@@ -53,20 +59,19 @@ fun RowScope.AddItem(
     currentDestination: NavDestination?,
     navController: NavHostController,
 ) {
-    BottomNavigationItem(
+    NavigationBarItem(
         label = {
             Text(text = screen.title)
         },
         icon = {
             Icon(
-                imageVector = screen.icon,
+                imageVector = ImageVector.vectorResource(screen.icon),
                 contentDescription = "Navigation Icon",
             )
         },
         selected = currentDestination?.hierarchy?.any {
             it.route == screen.route
         } == true,
-        unselectedContentColor = LocalContentColor.current.copy(alpha = ContentAlpha.disabled),
         onClick = {
             navController.navigate(screen.route) {
                 popUpTo(navController.graph.findStartDestination().id)

@@ -1,42 +1,35 @@
 package com.example.homesecurity
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class BottomBarScreen (
     val route: String,
     val title: String,
-    val icon: ImageVector
+    val icon: Int
 ){
     object Settings: BottomBarScreen(
         route = "settings",
         title = "Settings",
-        icon = Icons.Default.Settings
+        icon = R.drawable.ic_settings_black_24dp
     )
     object Record: BottomBarScreen(
         route = "record",
-        title = "Record",
-        icon = Icons.Default.Menu
+        title = "Records",
+        icon = R.drawable.ic_record_black_24dp
     )
     object Home: BottomBarScreen(
         route = "home",
         title = "Home",
-        icon = Icons.Default.Home
+        icon = R.drawable.ic_home_black_24dp
     )
     object SmartObj: BottomBarScreen(
         route = "smartobj",
-        title = "SmartObj",
-        icon = Icons.Default.MoreVert
+        title = "Objects",
+        icon = R.drawable.ic_smartobj_black_24dp
     )
     object Routine: BottomBarScreen(
         route = "routine",
-        title = "Routine",
-        icon = Icons.Default.Refresh
+        title = "Routines",
+        icon = R.drawable.ic_routine_black_24dp
     )
 
 }
