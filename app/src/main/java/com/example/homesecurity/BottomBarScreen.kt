@@ -31,5 +31,4 @@ sealed class BottomBarScreen (
         title = "Routines",
         icon = R.drawable.ic_routine_black_24dp
     )
-
 }

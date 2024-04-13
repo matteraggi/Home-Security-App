@@ -53,21 +53,20 @@ fun HomeScreen() {
     val records = remember {
         mutableListOf(
             RecordEl(
-                timestamp = "237284364344"
+                timestamp = "1"
             ),
             RecordEl(
-                timestamp = "237284364344"
+                timestamp = "2"
             ),
             RecordEl(
-                timestamp = "237284364344"
+                timestamp = "3"
             ),
             RecordEl(
-                timestamp = "237284364344"
+                timestamp = "4"
             ),
             RecordEl(
-                timestamp = "237284364344"
+                timestamp = "10"
             )
-
         )
     }
 
@@ -112,11 +111,11 @@ fun HomeScreen() {
                 Icon(Icons.Default.PowerSettingsNew, contentDescription = null, modifier = Modifier
                     .size(100.dp)
                     .align(Alignment.CenterHorizontally))
-                Text(if (viewModel.button.value) "OFF" else "ON" ,fontSize = 35.sp,modifier = Modifier.align(Alignment.CenterHorizontally))
+                Text(if (viewModel.button) "OFF" else "ON" ,fontSize = 35.sp,modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         }
         Text(
-            if (viewModel.buttonText.value) "L'allarme è acceso" else "L'allarme è spento",
+            if (viewModel.buttonText) "L'allarme è acceso" else "L'allarme è spento",
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 10.dp),
@@ -156,7 +155,7 @@ fun PersonBox(text: String) {
             .padding(8.dp)
             .clickable {
                 Toast
-                    .makeText(context, "Box cliccato: ${text}", Toast.LENGTH_SHORT)
+                    .makeText(context, "Box clicked: $text", Toast.LENGTH_SHORT)
                     .show()
             }
     ) {
@@ -171,7 +170,7 @@ fun PersonBox(text: String) {
 fun RecordBox(text: String) {
     val context = LocalContext.current
     Card(
-        onClick = { Toast.makeText(context, "Box cliccato: ${text}", Toast.LENGTH_SHORT).show() },
+        onClick = { Toast.makeText(context, "Box clicked: $text", Toast.LENGTH_SHORT).show() },
         modifier = Modifier.size(width = 120.dp, height = 90.dp),
     ) {
         Box(modifier = Modifier.padding(8.dp)) {

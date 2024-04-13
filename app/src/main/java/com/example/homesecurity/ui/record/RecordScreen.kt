@@ -1,6 +1,5 @@
 package com.example.homesecurity.ui.record
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,31 +13,30 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.ui.home.RecordEl
 
 @Composable
-fun RecordScreen() {
-
+fun RecordScreen(navController: NavController) {
     val records = remember {
         mutableListOf(
             RecordEl(
-                timestamp = "237284364344"
+                timestamp = "1"
             ),
             RecordEl(
-                timestamp = "237284364344"
+                timestamp = "2"
             ),
             RecordEl(
-                timestamp = "237284364344"
+                timestamp = "3"
             ),
             RecordEl(
-                timestamp = "237284364344"
+                timestamp = "4"
             ),
             RecordEl(
-                timestamp = "237284364344"
+                timestamp = "5"
             )
 
         )
@@ -52,30 +50,23 @@ fun RecordScreen() {
         LazyColumn(){
             items(records.size) { index ->
                 val record = records[index]
-                RecordLine(text = record.timestamp)
+                RecordLine(text = record.timestamp, navController)
             }
         }
     }
 }
 
 @Composable
-fun RecordLine(text: String) {
-    val context = LocalContext.current
+fun RecordLine(text: String, navController: NavController) {
     Card(
-
-        onClick = { Toast.makeText(context, "Box cliccato: ${text}", Toast.LENGTH_SHORT).show() },
-        modifier = Modifier.height(60.dp).fillMaxWidth()
+        onClick = {navController.navigate(NotBottomBarPages.SingleRecord.withArgs(text)) },
+        modifier = Modifier
+            .height(60.dp)
+            .fillMaxWidth()
     ) {
         Box(modifier = Modifier.padding(8.dp)) {
             Text(text = text, textAlign = TextAlign.Center)
         }
     }
     Spacer(modifier = Modifier.size(20.dp))
-}
-
-
-@Composable
-@Preview
-fun RecordScreenPreview() {
-    RecordScreen()
 }
