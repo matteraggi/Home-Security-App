@@ -1,5 +1,7 @@
 package com.example.homesecurity
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
@@ -18,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import com.amplifyframework.AmplifyException
 import com.amplifyframework.auth.AuthException
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
@@ -25,18 +28,22 @@ import com.amplifyframework.kotlin.core.Amplify
 import com.amplifyframework.ui.authenticator.enums.AuthenticatorStep
 import com.amplifyframework.ui.authenticator.rememberAuthenticatorState
 import com.amplifyframework.ui.authenticator.ui.Authenticator
-import com.example.homesecurity.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
-
-    private lateinit var binding: ActivityMainBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                0
+            )
+        }
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -54,8 +61,6 @@ class MainActivity : AppCompatActivity() {
                 Log.e("AmplifyQuickstart", "Failed to fetch auth session", error)
             }
         }
-
-        binding = ActivityMainBinding.inflate(layoutInflater)
 
         setContent{
             val authenticatorState = rememberAuthenticatorState(
@@ -103,16 +108,6 @@ fun AppTheme(
         primary = colorResource(id = R.color.blue_medium),
         secondary = colorResource(id = R.color.blue_high),
         tertiary = colorResource(id = R.color.white)
-
-        /* Other default colors to override
-        background = Color(0xFFFFFBFE),
-        surface = Color(0xFFFFFBFE),
-        onPrimary = Color.White,
-        onSecondary = Color.White,
-        onTertiary = Color.White,
-        onBackground = Color(0xFF1C1B1F),
-        onSurface = Color(0xFF1C1B1F),
-        */
     )
     val colors = if (!useDarkTheme) {
         lightColorScheme

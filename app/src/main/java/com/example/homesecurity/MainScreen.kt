@@ -19,6 +19,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.amplifyframework.ui.authenticator.SignedInState
 
+
+
 @Composable
 fun MainScreen(state: SignedInState) {
     val navController = rememberNavController()
