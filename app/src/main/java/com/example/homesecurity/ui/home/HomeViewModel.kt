@@ -4,12 +4,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 
 class HomeViewModel : ViewModel() {
-    var button = mutableStateOf(false).value;
-    var buttonText = mutableStateOf(false).value
+    var button = mutableStateOf(false)
+    var buttonText = mutableStateOf(false)
+
+
 
     fun changeButtonState() {
-        button = !button;
-        buttonText = !buttonText
+        button.value = !button.value
+        buttonText.value = !buttonText.value
     }
 
 }

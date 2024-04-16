@@ -30,7 +30,7 @@ fun BottomNavGraph(navController: NavHostController, paddingValues: PaddingValue
             RecordScreen(navController)
         }
         composable(route = BottomBarScreen.Home.route) {
-            HomeScreen()
+            HomeScreen(navController)
         }
         composable(route = BottomBarScreen.SmartObj.route) {
             SmartObjScreen()

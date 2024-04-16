@@ -1,6 +1,5 @@
 package com.example.homesecurity.ui.home
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -20,32 +18,46 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.NotificationService
 import com.example.homesecurity.R
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
     val people = remember {
         mutableListOf(
             PeopleBox(
                 name = "Matteo",
                 image = "immagine",
-                description = "sono io"
+                inside = true
             ),
             PeopleBox(
                 name = "Madre",
                 image = "immagine",
-                description = "è lei"
+                inside = true
+            ),
+            PeopleBox(
+                name = "Padre",
+                image = "immagine",
+                inside = true
+            ),
+            PeopleBox(
+                name = "Vale",
+                image = "immagine",
+                inside = true
             )
         )
     }
@@ -70,7 +82,7 @@ fun HomeScreen() {
         )
     }
 
-    val viewModel = viewModel<HomeViewModel>();
+    val viewModel = viewModel<HomeViewModel>()
 
     val service = NotificationService(LocalContext.current)
 
@@ -93,7 +105,7 @@ fun HomeScreen() {
         ){
             items(people.size) { index ->
                 val person = people[index]
-                PersonBox(text = person.name)
+                PersonBox(person)
             }
         }
 
@@ -111,11 +123,11 @@ fun HomeScreen() {
                 Icon(Icons.Default.PowerSettingsNew, contentDescription = null, modifier = Modifier
                     .size(100.dp)
                     .align(Alignment.CenterHorizontally))
-                Text(if (viewModel.button) "OFF" else "ON" ,fontSize = 35.sp,modifier = Modifier.align(Alignment.CenterHorizontally))
+                Text(if (viewModel.button.value) "OFF" else "ON" ,fontSize = 35.sp,modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         }
         Text(
-            if (viewModel.buttonText) "L'allarme è acceso" else "L'allarme è spento",
+            if (viewModel.buttonText.value) "L'allarme è acceso" else "L'allarme è spento",
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 10.dp),
@@ -124,13 +136,13 @@ fun HomeScreen() {
         Spacer(modifier = Modifier.size(40.dp))
         
         Button(onClick = {
-            service.showNotification();
+            service.showNotification()
         }) {
             Text("show notification!")
         }
 
         Text(
-            "Record:",
+            "Ultimi Record:",
             modifier = Modifier.padding(vertical = 10.dp),
             fontSize = 20.sp
         )
@@ -141,36 +153,37 @@ fun HomeScreen() {
         ){
             items(records.size) { index ->
                 val record = records[index]
-                RecordBox(text = record.timestamp)
+                RecordBox(text = record.timestamp, navController = navController)
             }
         }
     }
 }
 
 @Composable
-fun PersonBox(text: String) {
-    val context = LocalContext.current
+fun PersonBox(person: PeopleBox) {
+    val (inside, setInside) = remember { mutableStateOf(person.inside) }
     Box(
         modifier = Modifier
             .padding(8.dp)
             .clickable {
-                Toast
-                    .makeText(context, "Box clicked: $text", Toast.LENGTH_SHORT)
-                    .show()
+                setInside(!inside)
             }
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally){
-            Icon(imageVector = Icons.Default.AccountCircle, contentDescription = null, modifier = Modifier.size(80.dp))
-            Text(text = text, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.primary)
+            Icon(
+                painterResource(id = R.drawable.ic_baseline_person_24),
+                contentDescription = null,
+                tint = if(inside) Color.Black else Color.Gray,
+                modifier = Modifier.size(80.dp))
+            Text(text = person.name, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.primary)
         }
     }
 }
 
 @Composable
-fun RecordBox(text: String) {
-    val context = LocalContext.current
+fun RecordBox(text: String, navController: NavController) {
     Card(
-        onClick = { Toast.makeText(context, "Box clicked: $text", Toast.LENGTH_SHORT).show() },
+        onClick = { navController.navigate(NotBottomBarPages.SingleRecord.withArgs(text)) },
         modifier = Modifier.size(width = 120.dp, height = 90.dp),
     ) {
         Box(modifier = Modifier.padding(8.dp)) {
@@ -178,11 +191,4 @@ fun RecordBox(text: String) {
         }
     }
     Spacer(modifier = Modifier.size(20.dp))
-}
-
-
-@Composable
-@Preview
-fun HomeScreenPreview() {
-    HomeScreen()
 }

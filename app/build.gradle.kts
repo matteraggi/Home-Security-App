@@ -73,6 +73,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.6.5")
     implementation("androidx.work:work-runtime:2.9.0")
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("com.google.android.gms:play-services-nfc")
     coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:2.0.4")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
