@@ -1,5 +1,6 @@
 package com.example.homesecurity.ui.home
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -31,9 +32,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.amplifyframework.api.graphql.model.ModelMutation
+import com.amplifyframework.core.Amplify
+import com.amplifyframework.datastore.generated.model.User
 import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.NotificationService
 import com.example.homesecurity.R
+
+var userId: String? = null
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -113,7 +119,7 @@ fun HomeScreen(navController: NavController) {
 
         // Alarm Button
         Button(
-            onClick = { viewModel.changeButtonState() },
+            onClick = { changeButtonState(viewModel) },
             modifier = Modifier
                 .size(200.dp)
                 .align(Alignment.CenterHorizontally),
@@ -191,4 +197,43 @@ fun RecordBox(text: String, navController: NavController) {
         }
     }
     Spacer(modifier = Modifier.size(20.dp))
+}
+
+fun getCurrentUserId(): String? {
+    val authClient = Amplify.Auth
+
+    authClient.getCurrentUser(
+        { user ->
+            userId = user.userId
+        },
+        { error ->
+            Log.e("MyApp", "Error getting current user: $error")
+        }
+    )
+    return userId
+}
+
+fun changeButtonState(viewModel: HomeViewModel){
+    val id = getCurrentUserId()
+
+    if (id == null) {
+        // Handle missing user (log a warning or prompt user to sign in)
+        Log.w("Amplify", "No user found, cannot update alarm state")
+        return
+    }
+
+    val newAlarmValue = !viewModel.button.value
+
+    val updatedUser = User.builder().email(User.EMAIL.toString()).alarm(newAlarmValue).id(id).build()
+
+    Amplify.API.mutate(
+        ModelMutation.update(updatedUser),
+        { response ->
+            Log.i("Amplify", "Utente aggiornato")
+            viewModel.button.value = newAlarmValue
+        },
+        { error ->
+            Log.e("Amplify", "Errore durante l'aggiornamento dell'utente: $error")
+        }
+    )
 }

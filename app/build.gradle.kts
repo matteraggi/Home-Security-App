@@ -70,6 +70,7 @@ dependencies {
     implementation ("com.amplifyframework:aws-auth-cognito:2.14.11")
     implementation ("com.amplifyframework:core-kotlin:2.14.11")
     implementation ("com.amplifyframework.ui:authenticator:1.1.0")
+    implementation ("com.amplifyframework:aws-api:2.14.11")
     implementation("androidx.compose.material:material-icons-extended:1.6.5")
     implementation("androidx.work:work-runtime:2.9.0")
     implementation("io.coil-kt:coil-compose:2.4.0")

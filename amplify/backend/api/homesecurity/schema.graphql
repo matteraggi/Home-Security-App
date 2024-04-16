@@ -1,24 +1,27 @@
-type Device @model @auth(rules: [{allow: public}]) {
+type RecordData @model @auth(rules: [{allow: public}]) {
   id: ID!
-  alarm: Boolean!
-  homeUsers: [HomeUser!] @hasMany(indexName: "byDevice", fields: ["id"])
-  recordInfo: [RecordInfo!] @hasMany(indexName: "byDevice", fields: ["id"])
-  homeId: String!
-}
-
-type HomeUser @model @auth(rules: [{allow: public}]) {
-  id: ID!
-  device: Device! @belongsTo
-  field: String!
-  value: String!
-  deviceID: ID! @index(name: "byDevice")
-}
-
-type RecordInfo @model @auth(rules: [{allow: public}]) {
-  id: ID!
-  device: Device! @belongsTo
+  userID: ID! @index(name: "byUser")
+  User: User @belongsTo(fields: ["userID"])
   timestamp: String!
-  data: [String!]!
-  deviceID: ID! @index(name: "byDevice")
+  photo: [String!]
+}
+
+type Person @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  userID: ID! @index(name: "byUser")
+  User: User @belongsTo(fields: ["userID"])
+  inside: Boolean!
+  photo: String
+  name: String!
+  fingerprint: String
+  nfc: String
+}
+
+type User @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  email: AWSEmail!
+  People: [Person] @hasMany(indexName: "byUser", fields: ["id"])
+  RecordData: [RecordData] @hasMany(indexName: "byUser", fields: ["id"])
+  alarm: Boolean!
 }
  

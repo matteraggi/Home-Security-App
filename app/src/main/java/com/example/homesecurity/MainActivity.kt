@@ -22,6 +22,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.amplifyframework.AmplifyException
+import com.amplifyframework.api.aws.AWSApiPlugin
 import com.amplifyframework.auth.AuthException
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.kotlin.core.Amplify
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                Amplify.addPlugin(AWSApiPlugin())
                 Amplify.addPlugin(AWSCognitoAuthPlugin())
                 Amplify.configure(applicationContext)
                 Log.i("MyAmplifyApp", "Initialized Amplify")
@@ -61,6 +63,21 @@ class MainActivity : AppCompatActivity() {
                 Log.e("AmplifyQuickstart", "Failed to fetch auth session", error)
             }
         }
+
+        /*
+        Create User:
+
+        val model = User.builder()
+    		.email("test12346789@testemailtestemail.com")
+		    .password("Lorem ipsum dolor sit amet")
+		    .HomeUser(/* Provide a HomeUser instance here */)
+            .build()
+
+        Amplify.API.mutate(ModelMutation.create(model),
+            { Log.i("MyAmplifyApp", "User with id: ${it.data.id}") }
+            { Log.e("MyAmplifyApp", "Create failed", it) }
+        )
+        */
 
         setContent{
             val authenticatorState = rememberAuthenticatorState(
@@ -86,7 +103,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 ) { state ->
-                    MainScreen(state);
+                    MainScreen(state)
                 }
             }
         }
