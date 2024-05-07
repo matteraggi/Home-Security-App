@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +30,7 @@ import com.amplifyframework.kotlin.core.Amplify
 import com.amplifyframework.ui.authenticator.enums.AuthenticatorStep
 import com.amplifyframework.ui.authenticator.rememberAuthenticatorState
 import com.amplifyframework.ui.authenticator.ui.Authenticator
+import com.example.homesecurity.ui.home.HomeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+        val homeViewModel: HomeViewModel by viewModels()
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(
@@ -55,29 +58,14 @@ class MainActivity : AppCompatActivity() {
             } catch (error: AmplifyException) {
                 Log.e("MyAmplifyApp", "Could not initialize Amplify", error)
             }
-
             try {
                 val session = Amplify.Auth.fetchAuthSession()
                 Log.i("AmplifyQuickstart", "Auth session = $session")
             } catch (error: AuthException) {
                 Log.e("AmplifyQuickstart", "Failed to fetch auth session", error)
             }
+            homeViewModel.fetchButtonStateFromDatabase()
         }
-
-        /*
-        Create User:
-
-        val model = User.builder()
-    		.email("test12346789@testemailtestemail.com")
-		    .password("Lorem ipsum dolor sit amet")
-		    .HomeUser(/* Provide a HomeUser instance here */)
-            .build()
-
-        Amplify.API.mutate(ModelMutation.create(model),
-            { Log.i("MyAmplifyApp", "User with id: ${it.data.id}") }
-            { Log.e("MyAmplifyApp", "Create failed", it) }
-        )
-        */
 
         setContent{
             val authenticatorState = rememberAuthenticatorState(

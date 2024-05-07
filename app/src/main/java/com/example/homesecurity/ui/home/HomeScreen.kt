@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,6 +39,11 @@ import com.amplifyframework.datastore.generated.model.User
 import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.NotificationService
 import com.example.homesecurity.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+
 
 var userId: String? = null
 
@@ -89,6 +95,19 @@ fun HomeScreen(navController: NavController) {
     }
 
     val viewModel = viewModel<HomeViewModel>()
+    var hasChangedButtonState = remember { mutableStateOf(false) }
+
+
+    LaunchedEffect(viewModel.button.value) {
+        if (!hasChangedButtonState.value) {
+            CoroutineScope(Dispatchers.IO).launch {
+                changeButtonState(viewModel)
+                hasChangedButtonState.value = true // Set to true after execution
+            }
+        }
+    }
+
+
 
     val service = NotificationService(LocalContext.current)
 
@@ -119,7 +138,9 @@ fun HomeScreen(navController: NavController) {
 
         // Alarm Button
         Button(
-            onClick = { changeButtonState(viewModel) },
+            onClick = { CoroutineScope(Dispatchers.IO).launch {
+                changeButtonState(viewModel)
+            } },
             modifier = Modifier
                 .size(200.dp)
                 .align(Alignment.CenterHorizontally),
@@ -198,42 +219,35 @@ fun RecordBox(text: String, navController: NavController) {
     }
     Spacer(modifier = Modifier.size(20.dp))
 }
-
-fun getCurrentUserId(): String? {
-    val authClient = Amplify.Auth
-
-    authClient.getCurrentUser(
-        { user ->
-            userId = user.userId
-        },
-        { error ->
-            Log.e("MyApp", "Error getting current user: $error")
-        }
-    )
-    return userId
-}
-
-fun changeButtonState(viewModel: HomeViewModel){
+suspend fun changeButtonState(viewModel: HomeViewModel) {
     val id = getCurrentUserId()
-
-    if (id == null) {
-        // Handle missing user (log a warning or prompt user to sign in)
-        Log.w("Amplify", "No user found, cannot update alarm state")
+    if (id.isNullOrEmpty()) {
+        Log.e("Amplify", "ID utente nullo o vuoto")
         return
     }
 
+    val userEmail = getUserEmail(id)
     val newAlarmValue = !viewModel.button.value
 
-    val updatedUser = User.builder().email(User.EMAIL.toString()).alarm(newAlarmValue).id(id).build()
+    val updatedUser = User.builder()
+        .email(userEmail)
+        .alarm(newAlarmValue)
+        .id(id)
+        .build()
 
-    Amplify.API.mutate(
-        ModelMutation.update(updatedUser),
-        { response ->
-            Log.i("Amplify", "Utente aggiornato")
-            viewModel.button.value = newAlarmValue
-        },
-        { error ->
-            Log.e("Amplify", "Errore durante l'aggiornamento dell'utente: $error")
-        }
-    )
+    try {
+        Amplify.API.mutate(
+            ModelMutation.update(updatedUser),
+            { _ ->
+                Log.i("Amplify", "Allarme aggiornato: $updatedUser")
+                viewModel.changeButtonUi()
+            },
+            { error ->
+                Log.e("Amplify", "Errore durante l'aggiornamento dell'utente: $error")
+            }
+        )
+    } catch (e: Exception) {
+        Log.e("Amplify", "Errore durante l'aggiornamento dell'utente: $e")
+    }
 }
+
