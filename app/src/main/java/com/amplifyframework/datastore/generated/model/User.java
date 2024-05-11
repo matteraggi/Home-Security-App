@@ -28,14 +28,13 @@ import static com.amplifyframework.core.model.query.predicate.QueryField.field;
 })
 public final class User implements Model {
   public static final QueryField ID = field("User", "id");
-  public static final QueryField EMAIL = field("User", "email");
   public static final QueryField ALARM = field("User", "alarm");
+  public static final QueryField CREATED_AT = field("User", "createdAt");
   private final @ModelField(targetType="ID", isRequired = true) String id;
-  private final @ModelField(targetType="AWSEmail", isRequired = true) String email;
   private final @ModelField(targetType="Person") @HasMany(associatedWith = "User", type = Person.class) List<Person> People = null;
   private final @ModelField(targetType="RecordData") @HasMany(associatedWith = "User", type = RecordData.class) List<RecordData> RecordData = null;
   private final @ModelField(targetType="Boolean", isRequired = true) Boolean alarm;
-  private @ModelField(targetType="AWSDateTime", isReadOnly = true) Temporal.DateTime createdAt;
+  private final @ModelField(targetType="String") String createdAt;
   private @ModelField(targetType="AWSDateTime", isReadOnly = true) Temporal.DateTime updatedAt;
   /** @deprecated This API is internal to Amplify and should not be used. */
   @Deprecated
@@ -45,10 +44,6 @@ public final class User implements Model {
   
   public String getId() {
       return id;
-  }
-  
-  public String getEmail() {
-      return email;
   }
   
   public List<Person> getPeople() {
@@ -63,7 +58,7 @@ public final class User implements Model {
       return alarm;
   }
   
-  public Temporal.DateTime getCreatedAt() {
+  public String getCreatedAt() {
       return createdAt;
   }
   
@@ -71,10 +66,10 @@ public final class User implements Model {
       return updatedAt;
   }
   
-  private User(String id, String email, Boolean alarm) {
+  private User(String id, Boolean alarm, String createdAt) {
     this.id = id;
-    this.email = email;
     this.alarm = alarm;
+    this.createdAt = createdAt;
   }
   
   @Override
@@ -86,7 +81,6 @@ public final class User implements Model {
       } else {
       User user = (User) obj;
       return ObjectsCompat.equals(getId(), user.getId()) &&
-              ObjectsCompat.equals(getEmail(), user.getEmail()) &&
               ObjectsCompat.equals(getAlarm(), user.getAlarm()) &&
               ObjectsCompat.equals(getCreatedAt(), user.getCreatedAt()) &&
               ObjectsCompat.equals(getUpdatedAt(), user.getUpdatedAt());
@@ -97,7 +91,6 @@ public final class User implements Model {
    public int hashCode() {
     return new StringBuilder()
       .append(getId())
-      .append(getEmail())
       .append(getAlarm())
       .append(getCreatedAt())
       .append(getUpdatedAt())
@@ -110,7 +103,6 @@ public final class User implements Model {
     return new StringBuilder()
       .append("User {")
       .append("id=" + String.valueOf(getId()) + ", ")
-      .append("email=" + String.valueOf(getEmail()) + ", ")
       .append("alarm=" + String.valueOf(getAlarm()) + ", ")
       .append("createdAt=" + String.valueOf(getCreatedAt()) + ", ")
       .append("updatedAt=" + String.valueOf(getUpdatedAt()))
@@ -118,7 +110,7 @@ public final class User implements Model {
       .toString();
   }
   
-  public static EmailStep builder() {
+  public static AlarmStep builder() {
       return new Builder();
   }
   
@@ -140,14 +132,9 @@ public final class User implements Model {
   
   public CopyOfBuilder copyOfBuilder() {
     return new CopyOfBuilder(id,
-      email,
-      alarm);
+      alarm,
+      createdAt);
   }
-  public interface EmailStep {
-    AlarmStep email(String email);
-  }
-  
-
   public interface AlarmStep {
     BuildStep alarm(Boolean alarm);
   }
@@ -156,21 +143,22 @@ public final class User implements Model {
   public interface BuildStep {
     User build();
     BuildStep id(String id);
+    BuildStep createdAt(String createdAt);
   }
   
 
-  public static class Builder implements EmailStep, AlarmStep, BuildStep {
+  public static class Builder implements AlarmStep, BuildStep {
     private String id;
-    private String email;
     private Boolean alarm;
+    private String createdAt;
     public Builder() {
       
     }
     
-    private Builder(String id, String email, Boolean alarm) {
+    private Builder(String id, Boolean alarm, String createdAt) {
       this.id = id;
-      this.email = email;
       this.alarm = alarm;
+      this.createdAt = createdAt;
     }
     
     @Override
@@ -179,21 +167,20 @@ public final class User implements Model {
         
         return new User(
           id,
-          email,
-          alarm);
-    }
-    
-    @Override
-     public AlarmStep email(String email) {
-        Objects.requireNonNull(email);
-        this.email = email;
-        return this;
+          alarm,
+          createdAt);
     }
     
     @Override
      public BuildStep alarm(Boolean alarm) {
         Objects.requireNonNull(alarm);
         this.alarm = alarm;
+        return this;
+    }
+    
+    @Override
+     public BuildStep createdAt(String createdAt) {
+        this.createdAt = createdAt;
         return this;
     }
     
@@ -209,20 +196,19 @@ public final class User implements Model {
   
 
   public final class CopyOfBuilder extends Builder {
-    private CopyOfBuilder(String id, String email, Boolean alarm) {
-      super(id, email, alarm);
-      Objects.requireNonNull(email);
+    private CopyOfBuilder(String id, Boolean alarm, String createdAt) {
+      super(id, alarm, createdAt);
       Objects.requireNonNull(alarm);
-    }
-    
-    @Override
-     public CopyOfBuilder email(String email) {
-      return (CopyOfBuilder) super.email(email);
     }
     
     @Override
      public CopyOfBuilder alarm(Boolean alarm) {
       return (CopyOfBuilder) super.alarm(alarm);
+    }
+    
+    @Override
+     public CopyOfBuilder createdAt(String createdAt) {
+      return (CopyOfBuilder) super.createdAt(createdAt);
     }
   }
   

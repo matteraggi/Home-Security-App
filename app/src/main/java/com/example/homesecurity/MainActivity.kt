@@ -5,7 +5,6 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +29,7 @@ import com.amplifyframework.kotlin.core.Amplify
 import com.amplifyframework.ui.authenticator.enums.AuthenticatorStep
 import com.amplifyframework.ui.authenticator.rememberAuthenticatorState
 import com.amplifyframework.ui.authenticator.ui.Authenticator
-import com.example.homesecurity.ui.home.HomeViewModel
+import com.example.homesecurity.ui.home.subscribeToUpdateUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,7 +38,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        val homeViewModel: HomeViewModel by viewModels()
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(
@@ -64,14 +62,14 @@ class MainActivity : AppCompatActivity() {
             } catch (error: AuthException) {
                 Log.e("AmplifyQuickstart", "Failed to fetch auth session", error)
             }
-            homeViewModel.fetchButtonStateFromDatabase()
+            subscribeToUpdateUser()
         }
 
         setContent{
             val authenticatorState = rememberAuthenticatorState(
                 initialStep = AuthenticatorStep.SignIn // Change to desired initial step (SignIn, SignUp, ResetPassword)
             )
-            AppTheme() {
+            AppTheme {
                 Authenticator(
                     state = authenticatorState,
                     headerContent = {

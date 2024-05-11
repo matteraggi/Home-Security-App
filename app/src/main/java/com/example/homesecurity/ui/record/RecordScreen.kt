@@ -11,35 +11,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.homesecurity.NotBottomBarPages
-import com.example.homesecurity.ui.home.RecordEl
+import com.example.homesecurity.ui.home.RecordViewModel
 
 @Composable
 fun RecordScreen(navController: NavController) {
-    val records = remember {
-        mutableListOf(
-            RecordEl(
-                timestamp = "1"
-            ),
-            RecordEl(
-                timestamp = "2"
-            ),
-            RecordEl(
-                timestamp = "3"
-            ),
-            RecordEl(
-                timestamp = "4"
-            ),
-            RecordEl(
-                timestamp = "5"
-            )
 
-        )
+    val recordViewModel = viewModel<RecordViewModel>()
+    val recordArray = recordViewModel.records.collectAsState()
+
+    LaunchedEffect(key1 = Unit) {
+        recordViewModel.listRecords()
     }
 
     Box(
@@ -47,10 +36,12 @@ fun RecordScreen(navController: NavController) {
             .fillMaxSize()
             .padding(horizontal = 20.dp, vertical = 20.dp)
     ) {
-        LazyColumn(){
-            items(records.size) { index ->
-                val record = records[index]
-                RecordLine(text = record.timestamp, navController)
+        LazyColumn {
+            recordArray.value?.let { recordsList ->
+                items(recordsList.size) { index ->
+                    val record = recordsList[index]
+                    RecordLine(text = record.timestamp, navController = navController)
+                }
             }
         }
     }

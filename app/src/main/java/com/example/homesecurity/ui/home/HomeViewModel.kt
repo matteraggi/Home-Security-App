@@ -1,31 +1,32 @@
 package com.example.homesecurity.ui.home
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HomeViewModel : ViewModel() {
-    var button = mutableStateOf(false)
-    var buttonText = mutableStateOf(false)
+    private val _buttonState = MutableStateFlow(false)
+    val buttonState = _buttonState.asStateFlow()
 
     fun changeButtonUi() {
-        button.value = !button.value
-        buttonText.value = !buttonText.value
-    }
-
-    fun changeButtonUiTo(value: Boolean){
-        button.value = value
-        buttonText.value = value
+        _buttonState.value = !_buttonState.value
+        Log.i("buttonValue", "valore bottone: ${_buttonState.value}")
     }
 
     fun fetchButtonStateFromDatabase() {
         viewModelScope.launch {
             try {
                 val alarmStatus = getUserAlarmState(getCurrentUserId())
-                changeButtonUiTo(alarmStatus)
-                Log.i("Amplify", "button state : $alarmStatus")
+                if(alarmStatus != _buttonState.value) {
+                    withContext(Dispatchers.Main) { // Wrap changeButtonUi with Dispatchers.Main
+                        changeButtonUi()
+                    }
+                }
             } catch (e: Exception) {
                 Log.e("Amplify", "Errore durante il recupero dello stato del pulsante: $e")
             }

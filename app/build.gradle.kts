@@ -44,6 +44,8 @@ android {
 
 dependencies {
     implementation("androidx.compose.material3:material3-android:1.2.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+    implementation ("com.google.dagger:hilt-android:2.40.5")
     val navVersion = "2.7.7"
     implementation("androidx.navigation:navigation-compose:$navVersion")
     val composeBom = platform("androidx.compose:compose-bom:2024.04.00")

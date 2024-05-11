@@ -14,12 +14,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -42,7 +44,6 @@ import com.example.homesecurity.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
 
 
 var userId: String? = null
@@ -74,53 +75,30 @@ fun HomeScreen(navController: NavController) {
         )
     }
 
-    val records = remember {
-        mutableListOf(
-            RecordEl(
-                timestamp = "1"
-            ),
-            RecordEl(
-                timestamp = "2"
-            ),
-            RecordEl(
-                timestamp = "3"
-            ),
-            RecordEl(
-                timestamp = "4"
-            ),
-            RecordEl(
-                timestamp = "10"
-            )
-        )
-    }
-
-    val viewModel = viewModel<HomeViewModel>()
-    var hasChangedButtonState = remember { mutableStateOf(false) }
-
-
-    LaunchedEffect(viewModel.button.value) {
-        if (!hasChangedButtonState.value) {
-            CoroutineScope(Dispatchers.IO).launch {
-                changeButtonState(viewModel)
-                hasChangedButtonState.value = true // Set to true after execution
-            }
-        }
-    }
-
-
-
+    val buttonViewModel = viewModel<HomeViewModel>()
+    val recordViewModel = viewModel<RecordViewModel>()
+    val buttonView = buttonViewModel.buttonState.collectAsState()
+    val recordArray = recordViewModel.records.collectAsState()
     val service = NotificationService(LocalContext.current)
+
+    val buttonColor = if(buttonView.value) colorResource(R.color.dark_red) else colorResource(R.color.dark_green)
+
+
+    LaunchedEffect(key1 = Unit) {
+        buttonViewModel.fetchButtonStateFromDatabase()
+        recordViewModel.listRecords()
+    }
 
     Column(
         modifier = Modifier
-            .padding(horizontal = 20.dp, vertical = 20.dp)
+            .padding(horizontal = 20.dp, vertical = 10.dp)
             .fillMaxSize()
     ) {
 
         // Testo chi è in casa
         Text(
             "Chi è in casa:",
-            modifier = Modifier.padding(vertical = 10.dp),
+            modifier = Modifier.padding(vertical = 5.dp),
             fontSize = 20.sp
         )
 
@@ -134,33 +112,28 @@ fun HomeScreen(navController: NavController) {
             }
         }
 
-        Spacer(modifier = Modifier.size(40.dp))
+        Spacer(modifier = Modifier.size(20.dp))
 
         // Alarm Button
         Button(
             onClick = { CoroutineScope(Dispatchers.IO).launch {
-                changeButtonState(viewModel)
+                changeButtonState(buttonViewModel)
             } },
             modifier = Modifier
-                .size(200.dp)
+                .size(120.dp)
                 .align(Alignment.CenterHorizontally),
             shape = CircleShape,
+            colors = ButtonDefaults.buttonColors(buttonColor),
         ) {
             Column{
                 Icon(Icons.Default.PowerSettingsNew, contentDescription = null, modifier = Modifier
-                    .size(100.dp)
+                    .size(60.dp)
                     .align(Alignment.CenterHorizontally))
-                Text(if (viewModel.button.value) "OFF" else "ON" ,fontSize = 35.sp,modifier = Modifier.align(Alignment.CenterHorizontally))
+                Text(if (buttonView.value) "OFF" else "ON" ,fontSize = 25.sp,modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         }
-        Text(
-            if (viewModel.buttonText.value) "L'allarme è acceso" else "L'allarme è spento",
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 10.dp),
-        )
 
-        Spacer(modifier = Modifier.size(40.dp))
+        Spacer(modifier = Modifier.size(20.dp))
         
         Button(onClick = {
             service.showNotification()
@@ -178,9 +151,11 @@ fun HomeScreen(navController: NavController) {
         LazyRow(
             Modifier.background(colorResource(id = R.color.white))
         ){
-            items(records.size) { index ->
-                val record = records[index]
-                RecordBox(text = record.timestamp, navController = navController)
+            recordArray.value?.let { recordsList ->
+                items(recordsList.size) { index ->
+                    val record = recordsList[index]
+                    RecordBox(text = record.timestamp, navController = navController)
+                }
             }
         }
     }
@@ -211,7 +186,7 @@ fun PersonBox(person: PeopleBox) {
 fun RecordBox(text: String, navController: NavController) {
     Card(
         onClick = { navController.navigate(NotBottomBarPages.SingleRecord.withArgs(text)) },
-        modifier = Modifier.size(width = 120.dp, height = 90.dp),
+        modifier = Modifier.size(width = 120.dp, height = 70.dp),
     ) {
         Box(modifier = Modifier.padding(8.dp)) {
             Text(text = text, textAlign = TextAlign.Center)
@@ -221,19 +196,14 @@ fun RecordBox(text: String, navController: NavController) {
 }
 suspend fun changeButtonState(viewModel: HomeViewModel) {
     val id = getCurrentUserId()
-    if (id.isNullOrEmpty()) {
+    if (id.isEmpty()) {
         Log.e("Amplify", "ID utente nullo o vuoto")
         return
     }
 
-    val userEmail = getUserEmail(id)
-    val newAlarmValue = !viewModel.button.value
+    val newAlarmValue = !viewModel.buttonState.value
 
-    val updatedUser = User.builder()
-        .email(userEmail)
-        .alarm(newAlarmValue)
-        .id(id)
-        .build()
+    val updatedUser = User.builder().alarm(newAlarmValue).id(id).build()
 
     try {
         Amplify.API.mutate(
@@ -250,4 +220,3 @@ suspend fun changeButtonState(viewModel: HomeViewModel) {
         Log.e("Amplify", "Errore durante l'aggiornamento dell'utente: $e")
     }
 }
-

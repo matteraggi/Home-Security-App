@@ -1,7 +1,6 @@
 package com.amplifyframework.datastore.generated.model;
 
 import com.amplifyframework.core.model.annotations.BelongsTo;
-import com.amplifyframework.core.model.temporal.Temporal;
 import com.amplifyframework.core.model.ModelIdentifier;
 
 import java.util.List;
@@ -32,12 +31,14 @@ public final class RecordData implements Model {
   public static final QueryField USER = field("RecordData", "userID");
   public static final QueryField TIMESTAMP = field("RecordData", "timestamp");
   public static final QueryField PHOTO = field("RecordData", "photo");
+  public static final QueryField CREATED_AT = field("RecordData", "createdAt");
+  public static final QueryField UPDATED_AT = field("RecordData", "updatedAt");
   private final @ModelField(targetType="ID", isRequired = true) String id;
   private final @ModelField(targetType="User") @BelongsTo(targetName = "userID", targetNames = {"userID"}, type = User.class) User User;
   private final @ModelField(targetType="String", isRequired = true) String timestamp;
   private final @ModelField(targetType="String") List<String> photo;
-  private @ModelField(targetType="AWSDateTime", isReadOnly = true) Temporal.DateTime createdAt;
-  private @ModelField(targetType="AWSDateTime", isReadOnly = true) Temporal.DateTime updatedAt;
+  private final @ModelField(targetType="String") String createdAt;
+  private final @ModelField(targetType="String") String updatedAt;
   /** @deprecated This API is internal to Amplify and should not be used. */
   @Deprecated
    public String resolveIdentifier() {
@@ -60,19 +61,21 @@ public final class RecordData implements Model {
       return photo;
   }
   
-  public Temporal.DateTime getCreatedAt() {
+  public String getCreatedAt() {
       return createdAt;
   }
   
-  public Temporal.DateTime getUpdatedAt() {
+  public String getUpdatedAt() {
       return updatedAt;
   }
   
-  private RecordData(String id, User User, String timestamp, List<String> photo) {
+  private RecordData(String id, User User, String timestamp, List<String> photo, String createdAt, String updatedAt) {
     this.id = id;
     this.User = User;
     this.timestamp = timestamp;
     this.photo = photo;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
   }
   
   @Override
@@ -136,6 +139,8 @@ public final class RecordData implements Model {
       id,
       null,
       null,
+      null,
+      null,
       null
     );
   }
@@ -144,7 +149,9 @@ public final class RecordData implements Model {
     return new CopyOfBuilder(id,
       User,
       timestamp,
-      photo);
+      photo,
+      createdAt,
+      updatedAt);
   }
   public interface TimestampStep {
     BuildStep timestamp(String timestamp);
@@ -156,6 +163,8 @@ public final class RecordData implements Model {
     BuildStep id(String id);
     BuildStep user(User user);
     BuildStep photo(List<String> photo);
+    BuildStep createdAt(String createdAt);
+    BuildStep updatedAt(String updatedAt);
   }
   
 
@@ -164,15 +173,19 @@ public final class RecordData implements Model {
     private String timestamp;
     private User User;
     private List<String> photo;
+    private String createdAt;
+    private String updatedAt;
     public Builder() {
       
     }
     
-    private Builder(String id, User User, String timestamp, List<String> photo) {
+    private Builder(String id, User User, String timestamp, List<String> photo, String createdAt, String updatedAt) {
       this.id = id;
       this.User = User;
       this.timestamp = timestamp;
       this.photo = photo;
+      this.createdAt = createdAt;
+      this.updatedAt = updatedAt;
     }
     
     @Override
@@ -183,7 +196,9 @@ public final class RecordData implements Model {
           id,
           User,
           timestamp,
-          photo);
+          photo,
+          createdAt,
+          updatedAt);
     }
     
     @Override
@@ -205,6 +220,18 @@ public final class RecordData implements Model {
         return this;
     }
     
+    @Override
+     public BuildStep createdAt(String createdAt) {
+        this.createdAt = createdAt;
+        return this;
+    }
+    
+    @Override
+     public BuildStep updatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
+        return this;
+    }
+    
     /**
      * @param id id
      * @return Current Builder instance, for fluent method chaining
@@ -217,8 +244,8 @@ public final class RecordData implements Model {
   
 
   public final class CopyOfBuilder extends Builder {
-    private CopyOfBuilder(String id, User user, String timestamp, List<String> photo) {
-      super(id, User, timestamp, photo);
+    private CopyOfBuilder(String id, User user, String timestamp, List<String> photo, String createdAt, String updatedAt) {
+      super(id, User, timestamp, photo, createdAt, updatedAt);
       Objects.requireNonNull(timestamp);
     }
     
@@ -235,6 +262,16 @@ public final class RecordData implements Model {
     @Override
      public CopyOfBuilder photo(List<String> photo) {
       return (CopyOfBuilder) super.photo(photo);
+    }
+    
+    @Override
+     public CopyOfBuilder createdAt(String createdAt) {
+      return (CopyOfBuilder) super.createdAt(createdAt);
+    }
+    
+    @Override
+     public CopyOfBuilder updatedAt(String updatedAt) {
+      return (CopyOfBuilder) super.updatedAt(updatedAt);
     }
   }
   

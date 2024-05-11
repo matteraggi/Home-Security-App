@@ -2,10 +2,12 @@ package com.example.homesecurity.ui.home
 
 import android.util.Log
 import com.amplifyframework.api.graphql.model.ModelQuery
+import com.amplifyframework.api.graphql.model.ModelSubscription
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.datastore.generated.model.User
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+
 
 suspend fun getCurrentUserId(): String {
     return suspendCoroutine { continuation ->
@@ -23,38 +25,12 @@ suspend fun getCurrentUserId(): String {
     }
 }
 
-
-suspend fun getUserEmail(id: String): String {
-    return suspendCoroutine { continuation ->
-        Amplify.API.query(
-            ModelQuery.get(User::class.java, id),
-            { response ->
-                val user = response.data
-                if (user != null) {
-                    val userEmail = user.email
-                    continuation.resume(userEmail)
-                    Log.i("Amplify", "Retrieved user: $user")
-                } else {
-                    Log.w("Amplify", "User with ID $id not found")
-                    continuation.resume("")
-                }
-            },
-            { error ->
-                Log.e("Amplify", "Error querying user: $error")
-                continuation.resume("")
-            }
-        )
-    }
-}
-
-
 suspend fun getUserAlarmState(id: String): Boolean {
     return suspendCoroutine { continuation ->
         Amplify.API.query(
             ModelQuery.get(User::class.java, id),
             { response ->
                 val user = response.data
-                Log.i("User", "response: $response")
                 if (user != null) {
                     val alarmState = user.alarm
                     Log.i("User", "Retrieved user: $user")
@@ -68,6 +44,24 @@ suspend fun getUserAlarmState(id: String): Boolean {
                 Log.e("User", "Error querying user: $error")
                 continuation.resume(false) // Restituiamo false in caso di errore
             }
+        )
+    }
+}
+
+suspend fun subscribeToUpdateUser() {
+    return suspendCoroutine { _ ->
+        Amplify.API.subscribe(
+            ModelSubscription.onUpdate(User::class.java),
+            { Log.i("ApiQuickStart Subscription", "Subscription established") },
+            { response ->
+                val data = response.data as User
+                //fare robe
+                Log.i("ApiQuickStart Subscription", "User modificato: ${data.alarm}")
+            },
+            { error ->
+                Log.e("ApiQuickStart Subscription", "Errore durante la sottoscrizione", error)
+            },
+            { Log.i("ApiQuickStart Subscription", "Subscription completed") }
         )
     }
 }

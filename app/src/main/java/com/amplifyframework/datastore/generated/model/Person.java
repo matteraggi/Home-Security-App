@@ -35,6 +35,7 @@ public final class Person implements Model {
   public static final QueryField NAME = field("Person", "name");
   public static final QueryField FINGERPRINT = field("Person", "fingerprint");
   public static final QueryField NFC = field("Person", "nfc");
+  public static final QueryField CREATED_AT = field("Person", "createdAt");
   private final @ModelField(targetType="ID", isRequired = true) String id;
   private final @ModelField(targetType="User") @BelongsTo(targetName = "userID", targetNames = {"userID"}, type = User.class) User User;
   private final @ModelField(targetType="Boolean", isRequired = true) Boolean inside;
@@ -42,7 +43,7 @@ public final class Person implements Model {
   private final @ModelField(targetType="String", isRequired = true) String name;
   private final @ModelField(targetType="String") String fingerprint;
   private final @ModelField(targetType="String") String nfc;
-  private @ModelField(targetType="AWSDateTime", isReadOnly = true) Temporal.DateTime createdAt;
+  private final @ModelField(targetType="String", isRequired = true) String createdAt;
   private @ModelField(targetType="AWSDateTime", isReadOnly = true) Temporal.DateTime updatedAt;
   /** @deprecated This API is internal to Amplify and should not be used. */
   @Deprecated
@@ -78,7 +79,7 @@ public final class Person implements Model {
       return nfc;
   }
   
-  public Temporal.DateTime getCreatedAt() {
+  public String getCreatedAt() {
       return createdAt;
   }
   
@@ -86,7 +87,7 @@ public final class Person implements Model {
       return updatedAt;
   }
   
-  private Person(String id, User User, Boolean inside, String photo, String name, String fingerprint, String nfc) {
+  private Person(String id, User User, Boolean inside, String photo, String name, String fingerprint, String nfc, String createdAt) {
     this.id = id;
     this.User = User;
     this.inside = inside;
@@ -94,6 +95,7 @@ public final class Person implements Model {
     this.name = name;
     this.fingerprint = fingerprint;
     this.nfc = nfc;
+    this.createdAt = createdAt;
   }
   
   @Override
@@ -169,6 +171,7 @@ public final class Person implements Model {
       null,
       null,
       null,
+      null,
       null
     );
   }
@@ -180,7 +183,8 @@ public final class Person implements Model {
       photo,
       name,
       fingerprint,
-      nfc);
+      nfc,
+      createdAt);
   }
   public interface InsideStep {
     NameStep inside(Boolean inside);
@@ -188,7 +192,12 @@ public final class Person implements Model {
   
 
   public interface NameStep {
-    BuildStep name(String name);
+    CreatedAtStep name(String name);
+  }
+  
+
+  public interface CreatedAtStep {
+    BuildStep createdAt(String createdAt);
   }
   
 
@@ -202,10 +211,11 @@ public final class Person implements Model {
   }
   
 
-  public static class Builder implements InsideStep, NameStep, BuildStep {
+  public static class Builder implements InsideStep, NameStep, CreatedAtStep, BuildStep {
     private String id;
     private Boolean inside;
     private String name;
+    private String createdAt;
     private User User;
     private String photo;
     private String fingerprint;
@@ -214,7 +224,7 @@ public final class Person implements Model {
       
     }
     
-    private Builder(String id, User User, Boolean inside, String photo, String name, String fingerprint, String nfc) {
+    private Builder(String id, User User, Boolean inside, String photo, String name, String fingerprint, String nfc, String createdAt) {
       this.id = id;
       this.User = User;
       this.inside = inside;
@@ -222,6 +232,7 @@ public final class Person implements Model {
       this.name = name;
       this.fingerprint = fingerprint;
       this.nfc = nfc;
+      this.createdAt = createdAt;
     }
     
     @Override
@@ -235,7 +246,8 @@ public final class Person implements Model {
           photo,
           name,
           fingerprint,
-          nfc);
+          nfc,
+          createdAt);
     }
     
     @Override
@@ -246,9 +258,16 @@ public final class Person implements Model {
     }
     
     @Override
-     public BuildStep name(String name) {
+     public CreatedAtStep name(String name) {
         Objects.requireNonNull(name);
         this.name = name;
+        return this;
+    }
+    
+    @Override
+     public BuildStep createdAt(String createdAt) {
+        Objects.requireNonNull(createdAt);
+        this.createdAt = createdAt;
         return this;
     }
     
@@ -288,10 +307,11 @@ public final class Person implements Model {
   
 
   public final class CopyOfBuilder extends Builder {
-    private CopyOfBuilder(String id, User user, Boolean inside, String photo, String name, String fingerprint, String nfc) {
-      super(id, User, inside, photo, name, fingerprint, nfc);
+    private CopyOfBuilder(String id, User user, Boolean inside, String photo, String name, String fingerprint, String nfc, String createdAt) {
+      super(id, User, inside, photo, name, fingerprint, nfc, createdAt);
       Objects.requireNonNull(inside);
       Objects.requireNonNull(name);
+      Objects.requireNonNull(createdAt);
     }
     
     @Override
@@ -302,6 +322,11 @@ public final class Person implements Model {
     @Override
      public CopyOfBuilder name(String name) {
       return (CopyOfBuilder) super.name(name);
+    }
+    
+    @Override
+     public CopyOfBuilder createdAt(String createdAt) {
+      return (CopyOfBuilder) super.createdAt(createdAt);
     }
     
     @Override

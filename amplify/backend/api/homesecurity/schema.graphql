@@ -4,7 +4,8 @@ type RecordData @model @auth(rules: [{allow: public}]) {
   User: User @belongsTo(fields: ["userID"])
   timestamp: String!
   photo: [String!]
-  createdAt: String!
+  createdAt: String
+  updatedAt: String
 }
 
 type Person @model @auth(rules: [{allow: public}]) {
@@ -21,10 +22,9 @@ type Person @model @auth(rules: [{allow: public}]) {
 
 type User @model @auth(rules: [{allow: public}]) {
   id: ID!
-  email: AWSEmail
   People: [Person] @hasMany(indexName: "byUser", fields: ["id"])
   RecordData: [RecordData] @hasMany(indexName: "byUser", fields: ["id"])
   alarm: Boolean!
-  createdAt: String!
+  createdAt: String
 }
  
