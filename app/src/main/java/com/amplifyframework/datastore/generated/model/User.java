@@ -1,7 +1,6 @@
 package com.amplifyframework.datastore.generated.model;
 
 import com.amplifyframework.core.model.annotations.HasMany;
-import com.amplifyframework.core.model.temporal.Temporal;
 import com.amplifyframework.core.model.ModelIdentifier;
 
 import java.util.List;
@@ -29,13 +28,16 @@ import static com.amplifyframework.core.model.query.predicate.QueryField.field;
 public final class User implements Model {
   public static final QueryField ID = field("User", "id");
   public static final QueryField ALARM = field("User", "alarm");
+  public static final QueryField DEVICE_IDS = field("User", "deviceIds");
+  public static final QueryField UPDATED_AT = field("User", "updatedAt");
   public static final QueryField CREATED_AT = field("User", "createdAt");
   private final @ModelField(targetType="ID", isRequired = true) String id;
   private final @ModelField(targetType="Person") @HasMany(associatedWith = "User", type = Person.class) List<Person> People = null;
   private final @ModelField(targetType="RecordData") @HasMany(associatedWith = "User", type = RecordData.class) List<RecordData> RecordData = null;
   private final @ModelField(targetType="Boolean", isRequired = true) Boolean alarm;
+  private final @ModelField(targetType="String") List<String> deviceIds;
+  private final @ModelField(targetType="String") String updatedAt;
   private final @ModelField(targetType="String") String createdAt;
-  private @ModelField(targetType="AWSDateTime", isReadOnly = true) Temporal.DateTime updatedAt;
   /** @deprecated This API is internal to Amplify and should not be used. */
   @Deprecated
    public String resolveIdentifier() {
@@ -58,17 +60,23 @@ public final class User implements Model {
       return alarm;
   }
   
+  public List<String> getDeviceIds() {
+      return deviceIds;
+  }
+  
+  public String getUpdatedAt() {
+      return updatedAt;
+  }
+  
   public String getCreatedAt() {
       return createdAt;
   }
   
-  public Temporal.DateTime getUpdatedAt() {
-      return updatedAt;
-  }
-  
-  private User(String id, Boolean alarm, String createdAt) {
+  private User(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt) {
     this.id = id;
     this.alarm = alarm;
+    this.deviceIds = deviceIds;
+    this.updatedAt = updatedAt;
     this.createdAt = createdAt;
   }
   
@@ -82,8 +90,9 @@ public final class User implements Model {
       User user = (User) obj;
       return ObjectsCompat.equals(getId(), user.getId()) &&
               ObjectsCompat.equals(getAlarm(), user.getAlarm()) &&
-              ObjectsCompat.equals(getCreatedAt(), user.getCreatedAt()) &&
-              ObjectsCompat.equals(getUpdatedAt(), user.getUpdatedAt());
+              ObjectsCompat.equals(getDeviceIds(), user.getDeviceIds()) &&
+              ObjectsCompat.equals(getUpdatedAt(), user.getUpdatedAt()) &&
+              ObjectsCompat.equals(getCreatedAt(), user.getCreatedAt());
       }
   }
   
@@ -92,8 +101,9 @@ public final class User implements Model {
     return new StringBuilder()
       .append(getId())
       .append(getAlarm())
-      .append(getCreatedAt())
+      .append(getDeviceIds())
       .append(getUpdatedAt())
+      .append(getCreatedAt())
       .toString()
       .hashCode();
   }
@@ -104,8 +114,9 @@ public final class User implements Model {
       .append("User {")
       .append("id=" + String.valueOf(getId()) + ", ")
       .append("alarm=" + String.valueOf(getAlarm()) + ", ")
-      .append("createdAt=" + String.valueOf(getCreatedAt()) + ", ")
-      .append("updatedAt=" + String.valueOf(getUpdatedAt()))
+      .append("deviceIds=" + String.valueOf(getDeviceIds()) + ", ")
+      .append("updatedAt=" + String.valueOf(getUpdatedAt()) + ", ")
+      .append("createdAt=" + String.valueOf(getCreatedAt()))
       .append("}")
       .toString();
   }
@@ -126,6 +137,8 @@ public final class User implements Model {
     return new User(
       id,
       null,
+      null,
+      null,
       null
     );
   }
@@ -133,6 +146,8 @@ public final class User implements Model {
   public CopyOfBuilder copyOfBuilder() {
     return new CopyOfBuilder(id,
       alarm,
+      deviceIds,
+      updatedAt,
       createdAt);
   }
   public interface AlarmStep {
@@ -143,6 +158,8 @@ public final class User implements Model {
   public interface BuildStep {
     User build();
     BuildStep id(String id);
+    BuildStep deviceIds(List<String> deviceIds);
+    BuildStep updatedAt(String updatedAt);
     BuildStep createdAt(String createdAt);
   }
   
@@ -150,14 +167,18 @@ public final class User implements Model {
   public static class Builder implements AlarmStep, BuildStep {
     private String id;
     private Boolean alarm;
+    private List<String> deviceIds;
+    private String updatedAt;
     private String createdAt;
     public Builder() {
       
     }
     
-    private Builder(String id, Boolean alarm, String createdAt) {
+    private Builder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt) {
       this.id = id;
       this.alarm = alarm;
+      this.deviceIds = deviceIds;
+      this.updatedAt = updatedAt;
       this.createdAt = createdAt;
     }
     
@@ -168,6 +189,8 @@ public final class User implements Model {
         return new User(
           id,
           alarm,
+          deviceIds,
+          updatedAt,
           createdAt);
     }
     
@@ -175,6 +198,18 @@ public final class User implements Model {
      public BuildStep alarm(Boolean alarm) {
         Objects.requireNonNull(alarm);
         this.alarm = alarm;
+        return this;
+    }
+    
+    @Override
+     public BuildStep deviceIds(List<String> deviceIds) {
+        this.deviceIds = deviceIds;
+        return this;
+    }
+    
+    @Override
+     public BuildStep updatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
         return this;
     }
     
@@ -196,14 +231,24 @@ public final class User implements Model {
   
 
   public final class CopyOfBuilder extends Builder {
-    private CopyOfBuilder(String id, Boolean alarm, String createdAt) {
-      super(id, alarm, createdAt);
+    private CopyOfBuilder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt) {
+      super(id, alarm, deviceIds, updatedAt, createdAt);
       Objects.requireNonNull(alarm);
     }
     
     @Override
      public CopyOfBuilder alarm(Boolean alarm) {
       return (CopyOfBuilder) super.alarm(alarm);
+    }
+    
+    @Override
+     public CopyOfBuilder deviceIds(List<String> deviceIds) {
+      return (CopyOfBuilder) super.deviceIds(deviceIds);
+    }
+    
+    @Override
+     public CopyOfBuilder updatedAt(String updatedAt) {
+      return (CopyOfBuilder) super.updatedAt(updatedAt);
     }
     
     @Override

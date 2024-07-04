@@ -13,11 +13,12 @@ type Person @model @auth(rules: [{allow: public}]) {
   userID: ID! @index(name: "byUser")
   User: User @belongsTo(fields: ["userID"])
   inside: Boolean!
-  photo: String
   name: String!
   fingerprint: String
   nfc: String
-  createdAt: String!
+  photo: String
+  updatedAt: String
+  createdAt: String
 }
 
 type User @model @auth(rules: [{allow: public}]) {
@@ -25,6 +26,7 @@ type User @model @auth(rules: [{allow: public}]) {
   People: [Person] @hasMany(indexName: "byUser", fields: ["id"])
   RecordData: [RecordData] @hasMany(indexName: "byUser", fields: ["id"])
   alarm: Boolean!
+  deviceIds: [String]
+  updatedAt: String
   createdAt: String
-}
- 
+} 

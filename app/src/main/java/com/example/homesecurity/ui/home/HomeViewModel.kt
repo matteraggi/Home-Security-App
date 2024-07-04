@@ -21,8 +21,8 @@ class HomeViewModel : ViewModel() {
     fun fetchButtonStateFromDatabase() {
         viewModelScope.launch {
             try {
-                val alarmStatus = getUserAlarmState(getCurrentUserId())
-                if(alarmStatus != _buttonState.value) {
+                val alarmStatus = getUser(getCurrentUserId())
+                if(alarmStatus.alarm != _buttonState.value) {
                     withContext(Dispatchers.Main) { // Wrap changeButtonUi with Dispatchers.Main
                         changeButtonUi()
                     }

@@ -1,6 +1,7 @@
 package com.example.homesecurity.ui.home
 
 import android.util.Log
+import com.amplifyframework.api.graphql.model.ModelMutation
 import com.amplifyframework.api.graphql.model.ModelQuery
 import com.amplifyframework.api.graphql.model.ModelSubscription
 import com.amplifyframework.core.Amplify
@@ -25,43 +26,78 @@ suspend fun getCurrentUserId(): String {
     }
 }
 
-suspend fun getUserAlarmState(id: String): Boolean {
+suspend fun getUser(id: String): User {
     return suspendCoroutine { continuation ->
         Amplify.API.query(
-            ModelQuery.get(User::class.java, id),
+            ModelQuery[User::class.java, id],
             { response ->
                 val user = response.data
                 if (user != null) {
-                    val alarmState = user.alarm
                     Log.i("User", "Retrieved user: $user")
-                    continuation.resume(alarmState)
-                } else {
-                    Log.w("User", "User with ID $userId not found")
-                    continuation.resume(false) // Possiamo restituire un valore predefinito in caso di errore
+                    continuation.resume(user)
                 }
             },
             { error ->
                 Log.e("User", "Error querying user: $error")
-                continuation.resume(false) // Restituiamo false in caso di errore
             }
         )
     }
 }
 
-suspend fun subscribeToUpdateUser() {
-    return suspendCoroutine { _ ->
+suspend fun subscribeToUpdateUser(viewModel: HomeViewModel) {
+    val id = getCurrentUserId()
+    try {
         Amplify.API.subscribe(
             ModelSubscription.onUpdate(User::class.java),
-            { Log.i("ApiQuickStart Subscription", "Subscription established") },
+            { Log.i("Amplify Subscription", "Subscription established") },
             { response ->
+                Log.i("Amplify Subscription", "Un messaggio è stato ricevuto")
                 val data = response.data as User
-                //fare robe
-                Log.i("ApiQuickStart Subscription", "User modificato: ${data.alarm}")
+
+                if (id == data.id) { // da cambiare con filtro lato server e non client
+                    return@subscribe
+                }
+
+                if (data.alarm != viewModel.buttonState.value) {
+                    viewModel.changeButtonUi()
+                    Log.i("Amplify Subscription", "User modificato: ${data}")
+                }
             },
             { error ->
-                Log.e("ApiQuickStart Subscription", "Errore durante la sottoscrizione", error)
+                Log.e("Amplify Subscription", "Errore durante la sottoscrizione", error)
+                return@subscribe
             },
-            { Log.i("ApiQuickStart Subscription", "Subscription completed") }
+            { Log.i("Amplify Subscription", "Subscription completed") }
         )
+    }
+    catch (e: Exception) {
+        Log.e("Amplify Subscription", "Errore durante subscription: $e")
+    }
+}
+
+suspend fun changeButtonState(viewModel: HomeViewModel) {
+    val id = getCurrentUserId()
+    if (id.isEmpty()) {
+        Log.e("Amplify Alarm Mutation", "ID utente nullo o vuoto")
+        return
+    }
+
+    val newAlarmValue = !viewModel.buttonState.value
+
+    val updatedUser = User.builder().alarm(newAlarmValue).id(id).build()
+
+    try {
+        Amplify.API.mutate(
+            ModelMutation.update(updatedUser),
+            { _ ->
+                Log.i("Amplify Alarm Mutation", "Allarme aggiornato: $updatedUser")
+                viewModel.changeButtonUi()
+            },
+            { error ->
+                Log.e("Amplify Alarm Mutation", "Errore durante l'aggiornamento dell'utente: $error")
+            }
+        )
+    } catch (e: Exception) {
+        Log.e("Amplify Alarm Mutation", "Errore durante l'aggiornamento dell'utente: $e")
     }
 }

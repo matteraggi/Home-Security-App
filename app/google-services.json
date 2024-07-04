@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "365418489783",
+    "project_id": "home-security-notification",
+    "storage_bucket": "home-security-notification.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:365418489783:android:2e67908062eaba04926a32",
+        "android_client_info": {
+          "package_name": "com.example.homesecurity"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRPOWnqO7TMq0ID9Pojk7a9DGbCMWNCzU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

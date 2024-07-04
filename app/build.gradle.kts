@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -43,6 +44,9 @@ android {
 }
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation ("com.google.firebase:firebase-messaging")
     implementation("androidx.compose.material3:material3-android:1.2.1")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     implementation ("com.google.dagger:hilt-android:2.40.5")
@@ -69,10 +73,12 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
     implementation ("com.amplifyframework:core:2.14.11")
+    implementation ("com.amazonaws:aws-android-sdk-lambda:2.22.4")
     implementation ("com.amplifyframework:aws-auth-cognito:2.14.11")
     implementation ("com.amplifyframework:core-kotlin:2.14.11")
     implementation ("com.amplifyframework.ui:authenticator:1.1.0")
     implementation ("com.amplifyframework:aws-api:2.14.11")
+    implementation ("com.amplifyframework:aws-datastore:2.16.1")
     implementation("androidx.compose.material:material-icons-extended:1.6.5")
     implementation("androidx.work:work-runtime:2.9.0")
     implementation("io.coil-kt:coil-compose:2.4.0")

@@ -1,6 +1,5 @@
 package com.example.homesecurity.ui.home
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -35,18 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.amplifyframework.api.graphql.model.ModelMutation
-import com.amplifyframework.core.Amplify
-import com.amplifyframework.datastore.generated.model.User
 import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.NotificationService
 import com.example.homesecurity.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-
-var userId: String? = null
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -75,20 +68,22 @@ fun HomeScreen(navController: NavController) {
         )
     }
 
-    val buttonViewModel = viewModel<HomeViewModel>()
-    val recordViewModel = viewModel<RecordViewModel>()
+    val buttonViewModel: HomeViewModel = viewModel()
+    val recordViewModel: RecordViewModel = viewModel()
     val buttonView = buttonViewModel.buttonState.collectAsState()
     val recordArray = recordViewModel.records.collectAsState()
-    val service = NotificationService(LocalContext.current)
 
-    val buttonColor = if(buttonView.value) colorResource(R.color.dark_red) else colorResource(R.color.dark_green)
+    val context = LocalContext.current
+    val service = remember { NotificationService(context) }
 
+    val buttonColor = if (buttonView.value) colorResource(R.color.dark_red) else colorResource(R.color.dark_green)
+    val buttonText = if (buttonView.value) "OFF" else "ON"
 
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(Unit) {
+        //subscribeToUpdateUser(buttonViewModel)
         buttonViewModel.fetchButtonStateFromDatabase()
         recordViewModel.listRecords()
     }
-
     Column(
         modifier = Modifier
             .padding(horizontal = 20.dp, vertical = 10.dp)
@@ -129,12 +124,12 @@ fun HomeScreen(navController: NavController) {
                 Icon(Icons.Default.PowerSettingsNew, contentDescription = null, modifier = Modifier
                     .size(60.dp)
                     .align(Alignment.CenterHorizontally))
-                Text(if (buttonView.value) "OFF" else "ON" ,fontSize = 25.sp,modifier = Modifier.align(Alignment.CenterHorizontally))
+                Text(buttonText ,fontSize = 25.sp,modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         }
 
         Spacer(modifier = Modifier.size(20.dp))
-        
+
         Button(onClick = {
             service.showNotification()
         }) {
@@ -193,30 +188,4 @@ fun RecordBox(text: String, navController: NavController) {
         }
     }
     Spacer(modifier = Modifier.size(20.dp))
-}
-suspend fun changeButtonState(viewModel: HomeViewModel) {
-    val id = getCurrentUserId()
-    if (id.isEmpty()) {
-        Log.e("Amplify", "ID utente nullo o vuoto")
-        return
-    }
-
-    val newAlarmValue = !viewModel.buttonState.value
-
-    val updatedUser = User.builder().alarm(newAlarmValue).id(id).build()
-
-    try {
-        Amplify.API.mutate(
-            ModelMutation.update(updatedUser),
-            { _ ->
-                Log.i("Amplify", "Allarme aggiornato: $updatedUser")
-                viewModel.changeButtonUi()
-            },
-            { error ->
-                Log.e("Amplify", "Errore durante l'aggiornamento dell'utente: $error")
-            }
-        )
-    } catch (e: Exception) {
-        Log.e("Amplify", "Errore durante l'aggiornamento dell'utente: $e")
-    }
 }

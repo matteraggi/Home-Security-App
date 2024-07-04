@@ -23,13 +23,17 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.amplifyframework.AmplifyException
 import com.amplifyframework.api.aws.AWSApiPlugin
+import com.amplifyframework.api.graphql.model.ModelMutation
 import com.amplifyframework.auth.AuthException
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.kotlin.core.Amplify
 import com.amplifyframework.ui.authenticator.enums.AuthenticatorStep
 import com.amplifyframework.ui.authenticator.rememberAuthenticatorState
 import com.amplifyframework.ui.authenticator.ui.Authenticator
-import com.example.homesecurity.ui.home.subscribeToUpdateUser
+import com.example.homesecurity.ui.home.getCurrentUserId
+import com.example.homesecurity.ui.home.getUser
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -62,7 +66,6 @@ class MainActivity : AppCompatActivity() {
             } catch (error: AuthException) {
                 Log.e("AmplifyQuickstart", "Failed to fetch auth session", error)
             }
-            subscribeToUpdateUser()
         }
 
         setContent{
@@ -89,9 +92,61 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 ) { state ->
+                    if (state.step == AuthenticatorStep.SignedIn) {
+                        onLoginSuccess()
+                    }
                     MainScreen(state)
                 }
             }
+        }
+    }
+}
+
+private fun onLoginSuccess() {
+    FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+        if (!task.isSuccessful) {
+            Log.w("onLoginSuccess", "Fetching FCM registration token failed", task.exception)
+            return@OnCompleteListener
+        }
+
+        // Get new FCM registration token
+        val token = task.result
+
+        // Log and toast
+        Log.i("onLoginSuccess", token)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val userId = getCurrentUserId();
+                checkAndUpdateDeviceId(userId, token)
+            } catch (error: AuthException) {
+                Log.e("onLoginSuccess", "Failed to get current user", error)
+            }
+        }
+    })
+}
+
+private fun checkAndUpdateDeviceId(userId: String, deviceId: String) {
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val user = getUser(userId)
+            if(!user.deviceIds.contains(deviceId)) {
+                user.deviceIds.add(deviceId)
+                com.amplifyframework.core.Amplify.API.mutate(
+                    ModelMutation.update(user),
+                    { _ ->
+                        Log.i("checkAndUpdateDeviceId", "User aggiornato")
+                    },
+                    { error ->
+                        Log.e(
+                            "checkAndUpdateDeviceId",
+                            "Errore durante l'aggiornamento dell'utente: $error"
+                        )
+                    }
+                )
+            }
+        } catch (error: AuthException) {
+            Log.e("checkAndUpdateDeviceId", "Failed to get current user", error)
         }
     }
 }
