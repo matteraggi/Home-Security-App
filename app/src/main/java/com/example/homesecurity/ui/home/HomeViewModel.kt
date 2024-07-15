@@ -3,6 +3,7 @@ package com.example.homesecurity.ui.home
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.amplifyframework.datastore.generated.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,11 +19,10 @@ class HomeViewModel : ViewModel() {
         Log.i("buttonValue", "valore bottone: ${_buttonState.value}")
     }
 
-    fun fetchButtonStateFromDatabase() {
+    fun fetchButtonStateFromDatabase(user: User) {
         viewModelScope.launch {
             try {
-                val alarmStatus = getUser(getCurrentUserId())
-                if(alarmStatus.alarm != _buttonState.value) {
+                if(user.alarm != _buttonState.value) {
                     withContext(Dispatchers.Main) { // Wrap changeButtonUi with Dispatchers.Main
                         changeButtonUi()
                     }

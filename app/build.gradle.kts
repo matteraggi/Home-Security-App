@@ -49,6 +49,9 @@ dependencies {
     implementation ("com.google.firebase:firebase-messaging")
     implementation("androidx.compose.material3:material3-android:1.2.1")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+    implementation ("com.polidea.rxandroidble2:rxandroidble:1.11.1")
+    implementation ("io.reactivex.rxjava3:rxjava:3.0.6")
+    implementation ("io.reactivex.rxjava3:rxandroid:3.0.0")
     implementation ("com.google.dagger:hilt-android:2.40.5")
     val navVersion = "2.7.7"
     implementation("androidx.navigation:navigation-compose:$navVersion")

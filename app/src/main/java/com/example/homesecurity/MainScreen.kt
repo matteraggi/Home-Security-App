@@ -22,9 +22,10 @@ import com.amplifyframework.ui.authenticator.SignedInState
 @Composable
 fun MainScreen(state: SignedInState) {
     val navController = rememberNavController()
+
     Scaffold(
         bottomBar = { BottomBar(navController = navController) }
-    ) {paddingValues ->
+    ) { paddingValues ->
         BottomNavGraph(navController = navController, paddingValues)
     }
 }
@@ -37,12 +38,11 @@ fun BottomBar(navController: NavHostController) {
         BottomBarScreen.Home,
         BottomBarScreen.SmartObj,
         BottomBarScreen.Routine,
-        )
+    )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    NavigationBar( containerColor = colorResource(id = R.color.white)
-    ) {
+    NavigationBar(containerColor = colorResource(id = R.color.white)) {
         screens.forEach { screen ->
             AddItem(
                 screen = screen,
@@ -80,15 +80,3 @@ fun RowScope.AddItem(
         }
     )
 }
-
-
-
-
-
-
-
-
-
-
-
-

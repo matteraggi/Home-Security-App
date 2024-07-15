@@ -5,6 +5,7 @@ import com.amplifyframework.api.graphql.model.ModelMutation
 import com.amplifyframework.api.graphql.model.ModelQuery
 import com.amplifyframework.api.graphql.model.ModelSubscription
 import com.amplifyframework.core.Amplify
+import com.amplifyframework.datastore.generated.model.Person
 import com.amplifyframework.datastore.generated.model.User
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -39,6 +40,23 @@ suspend fun getUser(id: String): User {
             },
             { error ->
                 Log.e("User", "Error querying user: $error")
+            }
+        )
+    }
+}
+
+suspend fun getHomePeople(id: String): List<Person> {
+    return suspendCoroutine { continuation ->
+        Amplify.API.query(
+            ModelQuery.list(Person::class.java, Person.USER.eq(id)),
+            { response ->
+                val paginatedResult = response.data
+                val people: List<Person> = paginatedResult.items.toList()
+                Log.i("People", "People list!")
+                continuation.resume(people)
+            },
+            { Log.e("People", "Query failure", it)
+                emptyList<Person>()
             }
         )
     }

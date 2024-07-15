@@ -3,11 +3,17 @@ package com.example.homesecurity
 
 sealed class NotBottomBarPages (
     val route: String,
-    val title: String,
 ){
     object SingleRecord: NotBottomBarPages(
         route = "singlerecord",
-        title = "Single Record"
+    )
+
+    object WifiList: NotBottomBarPages(
+        route = "wifilist",
+    )
+
+    object ConnectionWebView: NotBottomBarPages(
+        route = "webview",
     )
 
     fun withArgs(vararg args: String): String {

@@ -1,4 +1,3 @@
-package com.example.homesecurity.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,6 +14,7 @@ import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,39 +34,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.amplifyframework.datastore.generated.model.Person
 import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.NotificationService
 import com.example.homesecurity.R
+import com.example.homesecurity.ui.home.HomeViewModel
+import com.example.homesecurity.ui.home.RecordViewModel
+import com.example.homesecurity.ui.home.changeButtonState
+import com.example.homesecurity.ui.home.getCurrentUserId
+import com.example.homesecurity.ui.home.getHomePeople
+import com.example.homesecurity.ui.home.getUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(navController: NavController) {
-    val people = remember {
-        mutableListOf(
-            PeopleBox(
-                name = "Matteo",
-                image = "immagine",
-                inside = true
-            ),
-            PeopleBox(
-                name = "Madre",
-                image = "immagine",
-                inside = true
-            ),
-            PeopleBox(
-                name = "Padre",
-                image = "immagine",
-                inside = true
-            ),
-            PeopleBox(
-                name = "Vale",
-                image = "immagine",
-                inside = true
-            )
-        )
-    }
+
+    val peopleState = remember { mutableStateOf<List<Person>?>(null) }
+    val isLoading = remember { mutableStateOf(true) }
 
     val buttonViewModel: HomeViewModel = viewModel()
     val recordViewModel: RecordViewModel = viewModel()
@@ -81,75 +67,110 @@ fun HomeScreen(navController: NavController) {
 
     LaunchedEffect(Unit) {
         //subscribeToUpdateUser(buttonViewModel)
-        buttonViewModel.fetchButtonStateFromDatabase()
+        val user = getUser(getCurrentUserId())
+        val people = getHomePeople(user.id)
+        if (people.isEmpty()) {
+            peopleState.value = people
+        }
+        isLoading.value = false
+        buttonViewModel.fetchButtonStateFromDatabase(user)
         recordViewModel.listRecords()
     }
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 20.dp, vertical = 10.dp)
-            .fillMaxSize()
-    ) {
 
-        // Testo chi è in casa
-        Text(
-            "Chi è in casa:",
-            modifier = Modifier.padding(vertical = 5.dp),
-            fontSize = 20.sp
-        )
-
-        // People RecyclerView
-        LazyRow(
-            Modifier.background(colorResource(id = R.color.white))
-        ){
-            items(people.size) { index ->
-                val person = people[index]
-                PersonBox(person)
+    if (isLoading.value) {
+        // Schermata di caricamento
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    } else {
+        if (peopleState.value.isNullOrEmpty()) {
+            // Mostra un pulsante per navigare a un'altra pagina se l'array è vuoto
+            Box(contentAlignment = Alignment.Center) {
+                Column {
+                    Text(text = "Devi registrare il tuo primo Alarm e creare il tuo User")
+                    Button(onClick = {
+                        navController.navigate(NotBottomBarPages.WifiList.route)
+                    }) {
+                        Text("Registra un device")
+                    }
+                }
             }
-        }
+        } else {
+            // Mostra la schermata originale se l'array contiene dati
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp, vertical = 10.dp)
+                    .fillMaxSize()
+            ) {
 
-        Spacer(modifier = Modifier.size(20.dp))
+                // Testo chi è in casa
+                Text(
+                    "Chi è in casa:",
+                    modifier = Modifier.padding(vertical = 5.dp),
+                    fontSize = 20.sp
+                )
 
-        // Alarm Button
-        Button(
-            onClick = { CoroutineScope(Dispatchers.IO).launch {
-                changeButtonState(buttonViewModel)
-            } },
-            modifier = Modifier
-                .size(120.dp)
-                .align(Alignment.CenterHorizontally),
-            shape = CircleShape,
-            colors = ButtonDefaults.buttonColors(buttonColor),
-        ) {
-            Column{
-                Icon(Icons.Default.PowerSettingsNew, contentDescription = null, modifier = Modifier
-                    .size(60.dp)
-                    .align(Alignment.CenterHorizontally))
-                Text(buttonText ,fontSize = 25.sp,modifier = Modifier.align(Alignment.CenterHorizontally))
-            }
-        }
+                // People RecyclerView
+                LazyRow(
+                    Modifier.background(colorResource(id = R.color.white))
+                ) {
+                    items(peopleState.value!!.size) { index ->
+                        val person = peopleState.value!![index]
+                        PersonBox(person)
+                    }
+                }
 
-        Spacer(modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.size(20.dp))
 
-        Button(onClick = {
-            service.showNotification()
-        }) {
-            Text("show notification!")
-        }
+                // Alarm Button
+                Button(
+                    onClick = {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            changeButtonState(buttonViewModel)
+                        }
+                    },
+                    modifier = Modifier
+                        .size(120.dp)
+                        .align(Alignment.CenterHorizontally),
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(buttonColor),
+                ) {
+                    Column {
+                        Icon(
+                            Icons.Default.PowerSettingsNew,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(60.dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+                        Text(buttonText, fontSize = 25.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
+                    }
+                }
 
-        Text(
-            "Ultimi Record:",
-            modifier = Modifier.padding(vertical = 10.dp),
-            fontSize = 20.sp
-        )
+                Spacer(modifier = Modifier.size(20.dp))
 
-        // Record RecyclerView
-        LazyRow(
-            Modifier.background(colorResource(id = R.color.white))
-        ){
-            recordArray.value?.let { recordsList ->
-                items(recordsList.size) { index ->
-                    val record = recordsList[index]
-                    RecordBox(text = record.timestamp, navController = navController)
+                Button(onClick = {
+                    service.showNotification()
+                }) {
+                    Text("show notification!")
+                }
+
+                Text(
+                    "Ultimi Record:",
+                    modifier = Modifier.padding(vertical = 10.dp),
+                    fontSize = 20.sp
+                )
+
+                // Record RecyclerView
+                LazyRow(
+                    Modifier.background(colorResource(id = R.color.white))
+                ) {
+                    recordArray.value?.let { recordsList ->
+                        items(recordsList.size) { index ->
+                            val record = recordsList[index]
+                            RecordBox(text = record.timestamp, navController = navController)
+                        }
+                    }
                 }
             }
         }
@@ -157,7 +178,7 @@ fun HomeScreen(navController: NavController) {
 }
 
 @Composable
-fun PersonBox(person: PeopleBox) {
+fun PersonBox(person: Person) {
     val (inside, setInside) = remember { mutableStateOf(person.inside) }
     Box(
         modifier = Modifier

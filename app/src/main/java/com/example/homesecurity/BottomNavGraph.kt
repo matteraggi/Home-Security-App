@@ -1,5 +1,8 @@
 package com.example.homesecurity
 
+import HomeScreen
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -9,13 +12,17 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.homesecurity.ui.home.HomeScreen
+import com.example.homesecurity.ui.connectionwebview.ConnectionWebViewScreen
 import com.example.homesecurity.ui.record.RecordScreen
 import com.example.homesecurity.ui.routine.RoutineScreen
 import com.example.homesecurity.ui.settings.SettingsScreen
 import com.example.homesecurity.ui.singlerecord.SingleRecordScreen
 import com.example.homesecurity.ui.smartobj.SmartObjScreen
+import com.example.homesecurity.ui.wifilist.WifiListScreen
 
+
+//controllare se è ok questa linea
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun BottomNavGraph(navController: NavHostController, paddingValues: PaddingValues) {
     NavHost(
@@ -38,12 +45,21 @@ fun BottomNavGraph(navController: NavHostController, paddingValues: PaddingValue
         composable(route = BottomBarScreen.Routine.route) {
             RoutineScreen()
         }
-        composable(route = NotBottomBarPages.SingleRecord.route + "/{timestamp}", arguments = listOf(navArgument("timestamp"){
-            type = NavType.StringType
-            defaultValue = "0"
-            nullable = true
-        })) {entry ->
+        composable(
+            route = NotBottomBarPages.SingleRecord.route + "/{timestamp}",
+            arguments = listOf(navArgument("timestamp") {
+                type = NavType.StringType
+                defaultValue = "0"
+                nullable = true
+            })
+        ) { entry ->
             SingleRecordScreen(timestamp = entry.arguments?.getString("timestamp"))
+        }
+        composable(route = NotBottomBarPages.WifiList.route) {
+            WifiListScreen(navController)
+        }
+        composable(route = NotBottomBarPages.ConnectionWebView.route) {
+            ConnectionWebViewScreen()
         }
     }
 }
