@@ -42,7 +42,6 @@ import com.example.homesecurity.ui.home.HomeViewModel
 import com.example.homesecurity.ui.home.RecordViewModel
 import com.example.homesecurity.ui.home.changeButtonState
 import com.example.homesecurity.ui.home.getCurrentUserId
-import com.example.homesecurity.ui.home.getHomePeople
 import com.example.homesecurity.ui.home.getUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,6 +52,7 @@ fun HomeScreen(navController: NavController) {
 
     val peopleState = remember { mutableStateOf<List<Person>?>(null) }
     val isLoading = remember { mutableStateOf(true) }
+    val deviceConnected = remember { mutableStateOf(true) }
 
     val buttonViewModel: HomeViewModel = viewModel()
     val recordViewModel: RecordViewModel = viewModel()
@@ -68,9 +68,8 @@ fun HomeScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         //subscribeToUpdateUser(buttonViewModel)
         val user = getUser(getCurrentUserId())
-        val people = getHomePeople(user.id)
-        if (people.isEmpty()) {
-            peopleState.value = people
+        if (user.thingsIds.isNullOrEmpty()) {
+            deviceConnected.value = false
         }
         isLoading.value = false
         buttonViewModel.fetchButtonStateFromDatabase(user)
@@ -83,13 +82,13 @@ fun HomeScreen(navController: NavController) {
             CircularProgressIndicator()
         }
     } else {
-        if (peopleState.value.isNullOrEmpty()) {
+        if (!deviceConnected.value) {
             // Mostra un pulsante per navigare a un'altra pagina se l'array è vuoto
             Box(contentAlignment = Alignment.Center) {
                 Column {
-                    Text(text = "Devi registrare il tuo primo Alarm e creare il tuo User")
+                    Text(text = "Crea il tuo User e Connetti il tuo primo Device")
                     Button(onClick = {
-                        navController.navigate(NotBottomBarPages.WifiList.route)
+                        navController.navigate(NotBottomBarPages.CreateUser.route)
                     }) {
                         Text("Registra un device")
                     }
@@ -111,6 +110,7 @@ fun HomeScreen(navController: NavController) {
                 )
 
                 // People RecyclerView
+                /*
                 LazyRow(
                     Modifier.background(colorResource(id = R.color.white))
                 ) {
@@ -119,6 +119,8 @@ fun HomeScreen(navController: NavController) {
                         PersonBox(person)
                     }
                 }
+
+                 */
 
                 Spacer(modifier = Modifier.size(20.dp))
 

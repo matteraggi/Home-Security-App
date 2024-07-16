@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.homesecurity.ui.connectionwebview.ConnectionWebViewScreen
+import com.example.homesecurity.ui.createuser.CreateUserScreen
 import com.example.homesecurity.ui.record.RecordScreen
 import com.example.homesecurity.ui.routine.RoutineScreen
 import com.example.homesecurity.ui.settings.SettingsScreen
@@ -59,7 +60,10 @@ fun BottomNavGraph(navController: NavHostController, paddingValues: PaddingValue
             WifiListScreen(navController)
         }
         composable(route = NotBottomBarPages.ConnectionWebView.route) {
-            ConnectionWebViewScreen()
+            ConnectionWebViewScreen(navController)
+        }
+        composable(route = NotBottomBarPages.CreateUser.route) {
+            CreateUserScreen(navController)
         }
     }
 }

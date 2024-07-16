@@ -16,6 +16,10 @@ sealed class NotBottomBarPages (
         route = "webview",
     )
 
+    object CreateUser: NotBottomBarPages(
+        route = "createuser",
+    )
+
     fun withArgs(vararg args: String): String {
         return buildString {
             append(route)

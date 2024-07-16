@@ -29,4 +29,6 @@ type User @model @auth(rules: [{allow: public}]) {
   deviceIds: [String]
   updatedAt: String
   createdAt: String
-} 
+  thingsIds: [String]
+}
+ 
