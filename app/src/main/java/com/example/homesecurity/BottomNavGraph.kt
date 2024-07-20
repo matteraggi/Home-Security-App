@@ -14,8 +14,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.homesecurity.ui.connectionwebview.ConnectionWebViewScreen
 import com.example.homesecurity.ui.createuser.CreateUserScreen
+import com.example.homesecurity.ui.geofencing.GeofencingScreen
 import com.example.homesecurity.ui.record.RecordScreen
-import com.example.homesecurity.ui.routine.RoutineScreen
 import com.example.homesecurity.ui.settings.SettingsScreen
 import com.example.homesecurity.ui.singlerecord.SingleRecordScreen
 import com.example.homesecurity.ui.smartobj.SmartObjScreen
@@ -43,8 +43,8 @@ fun BottomNavGraph(navController: NavHostController, paddingValues: PaddingValue
         composable(route = BottomBarScreen.SmartObj.route) {
             SmartObjScreen()
         }
-        composable(route = BottomBarScreen.Routine.route) {
-            RoutineScreen()
+        composable(route = BottomBarScreen.Geofencing.route) {
+            GeofencingScreen()
         }
         composable(
             route = NotBottomBarPages.SingleRecord.route + "/{timestamp}",

@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -36,16 +35,20 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.amplifyframework.datastore.generated.model.Person
 import com.example.homesecurity.NotBottomBarPages
-import com.example.homesecurity.NotificationService
 import com.example.homesecurity.R
 import com.example.homesecurity.ui.home.HomeViewModel
-import com.example.homesecurity.ui.home.RecordViewModel
 import com.example.homesecurity.ui.home.changeButtonState
 import com.example.homesecurity.ui.home.getCurrentUserId
+import com.example.homesecurity.ui.home.getHomePeople
 import com.example.homesecurity.ui.home.getUser
+import com.example.homesecurity.ui.record.RecordViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -59,9 +62,6 @@ fun HomeScreen(navController: NavController) {
     val buttonView = buttonViewModel.buttonState.collectAsState()
     val recordArray = recordViewModel.records.collectAsState()
 
-    val context = LocalContext.current
-    val service = remember { NotificationService(context) }
-
     val buttonColor = if (buttonView.value) colorResource(R.color.dark_red) else colorResource(R.color.dark_green)
     val buttonText = if (buttonView.value) "OFF" else "ON"
 
@@ -72,6 +72,7 @@ fun HomeScreen(navController: NavController) {
             deviceConnected.value = false
         }
         isLoading.value = false
+        peopleState.value = getHomePeople(user.id)
         buttonViewModel.fetchButtonStateFromDatabase(user)
         recordViewModel.listRecords()
     }
@@ -110,17 +111,18 @@ fun HomeScreen(navController: NavController) {
                 )
 
                 // People RecyclerView
-                /*
-                LazyRow(
-                    Modifier.background(colorResource(id = R.color.white))
-                ) {
-                    items(peopleState.value!!.size) { index ->
-                        val person = peopleState.value!![index]
-                        PersonBox(person)
+                peopleState.value?.let { people ->
+                    if (people.isNotEmpty()) {
+                        LazyRow(
+                            Modifier.background(colorResource(id = R.color.white))
+                        ) {
+                            items(people.size) { index ->
+                                val person = people[index]
+                                PersonBox(person)
+                            }
+                        }
                     }
                 }
-
-                 */
 
                 Spacer(modifier = Modifier.size(20.dp))
 
@@ -151,12 +153,6 @@ fun HomeScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.size(20.dp))
 
-                Button(onClick = {
-                    service.showNotification()
-                }) {
-                    Text("show notification!")
-                }
-
                 Text(
                     "Ultimi Record:",
                     modifier = Modifier.padding(vertical = 10.dp),
@@ -170,7 +166,7 @@ fun HomeScreen(navController: NavController) {
                     recordArray.value?.let { recordsList ->
                         items(recordsList.size) { index ->
                             val record = recordsList[index]
-                            RecordBox(text = record.timestamp, navController = navController)
+                            RecordBox(timestamp = record.timestamp, navController = navController)
                         }
                     }
                 }
@@ -201,13 +197,19 @@ fun PersonBox(person: Person) {
 }
 
 @Composable
-fun RecordBox(text: String, navController: NavController) {
+fun RecordBox(timestamp: String, navController: NavController) {
+    val formattedDate = remember {
+        val sdf = SimpleDateFormat("HH:mm:ss dd-MM-yyyy", Locale.getDefault())
+        val date = Date(timestamp.toLong() * 1000)
+        sdf.format(date)
+    }
+
     Card(
-        onClick = { navController.navigate(NotBottomBarPages.SingleRecord.withArgs(text)) },
+        onClick = { navController.navigate(NotBottomBarPages.SingleRecord.withArgs(timestamp)) },
         modifier = Modifier.size(width = 120.dp, height = 70.dp),
     ) {
         Box(modifier = Modifier.padding(8.dp)) {
-            Text(text = text, textAlign = TextAlign.Center)
+            Text(text = formattedDate, textAlign = TextAlign.Center)
         }
     }
     Spacer(modifier = Modifier.size(20.dp))

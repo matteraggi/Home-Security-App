@@ -113,6 +113,10 @@ class MainActivity : AppCompatActivity() {
         permissions.add(Manifest.permission.CHANGE_NETWORK_STATE)
         permissions.add(Manifest.permission.INTERNET)
 
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions.add(Manifest.permission.POST_NOTIFICATIONS)
         }

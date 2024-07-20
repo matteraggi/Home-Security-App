@@ -13,13 +13,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.homesecurity.NotBottomBarPages
-import com.example.homesecurity.ui.home.RecordViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun RecordScreen(navController: NavController) {
@@ -40,7 +43,7 @@ fun RecordScreen(navController: NavController) {
             recordArray.value?.let { recordsList ->
                 items(recordsList.size) { index ->
                     val record = recordsList[index]
-                    RecordLine(text = record.timestamp, navController = navController)
+                    RecordLine(timestamp = record.timestamp, navController = navController)
                 }
             }
         }
@@ -48,15 +51,20 @@ fun RecordScreen(navController: NavController) {
 }
 
 @Composable
-fun RecordLine(text: String, navController: NavController) {
+fun RecordLine(timestamp: String, navController: NavController) {
+    val formattedDate = remember {
+        val sdf = SimpleDateFormat("HH:mm:ss dd-MM-yyyy", Locale.getDefault())
+        val date = Date(timestamp.toLong() * 1000)
+        sdf.format(date)
+    }
     Card(
-        onClick = {navController.navigate(NotBottomBarPages.SingleRecord.withArgs(text)) },
+        onClick = {navController.navigate(NotBottomBarPages.SingleRecord.withArgs(timestamp)) },
         modifier = Modifier
             .height(60.dp)
             .fillMaxWidth()
     ) {
         Box(modifier = Modifier.padding(8.dp)) {
-            Text(text = text, textAlign = TextAlign.Center)
+            Text(text = formattedDate, textAlign = TextAlign.Center)
         }
     }
     Spacer(modifier = Modifier.size(20.dp))

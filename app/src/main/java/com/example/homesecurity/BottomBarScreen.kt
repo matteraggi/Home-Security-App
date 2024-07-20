@@ -26,9 +26,9 @@ sealed class BottomBarScreen (
         title = "Objects",
         icon = R.drawable.ic_smartobj_black_24dp
     )
-    object Routine: BottomBarScreen(
-        route = "routine",
-        title = "Routines",
+    object Geofencing: BottomBarScreen(
+        route = "geofencing",
+        title = "GeoAlarm",
         icon = R.drawable.ic_routine_black_24dp
     )
 }

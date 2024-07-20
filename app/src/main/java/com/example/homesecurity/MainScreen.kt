@@ -37,7 +37,7 @@ fun BottomBar(navController: NavHostController) {
         BottomBarScreen.Record,
         BottomBarScreen.Home,
         BottomBarScreen.SmartObj,
-        BottomBarScreen.Routine,
+        BottomBarScreen.Geofencing,
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination

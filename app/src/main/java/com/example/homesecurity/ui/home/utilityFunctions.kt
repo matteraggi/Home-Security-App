@@ -121,3 +121,29 @@ suspend fun changeButtonState(viewModel: HomeViewModel) {
         Log.e("Amplify Alarm Mutation", "Errore durante l'aggiornamento dell'utente: $e")
     }
 }
+
+suspend fun changeButtonStateTo(state: Boolean) {
+    val id = getCurrentUserId()
+    if (id.isEmpty()) {
+        Log.e("Amplify Alarm Mutation", "ID utente nullo o vuoto")
+        return
+    }
+
+    val user = getUser(id)
+
+    val updatedUser = User.builder().alarm(state).deviceIds(user.deviceIds).updatedAt(user.updatedAt).thingsIds(user.thingsIds).id(id).build()
+
+    try {
+        Amplify.API.mutate(
+            ModelMutation.update(updatedUser),
+            { _ ->
+                Log.i("Amplify Alarm Mutation", "Allarme aggiornato: $updatedUser")
+            },
+            { error ->
+                Log.e("Amplify Alarm Mutation", "Errore durante l'aggiornamento dell'utente: $error")
+            }
+        )
+    } catch (e: Exception) {
+        Log.e("Amplify Alarm Mutation", "Errore durante l'aggiornamento dell'utente: $e")
+    }
+}
