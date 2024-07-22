@@ -27,8 +27,8 @@ sealed class BottomBarScreen (
         icon = R.drawable.ic_smartobj_black_24dp
     )
     object Geofencing: BottomBarScreen(
-        route = "geofencing",
-        title = "GeoAlarm",
+        route = "authentication",
+        title = "Auth",
         icon = R.drawable.ic_routine_black_24dp
     )
 }

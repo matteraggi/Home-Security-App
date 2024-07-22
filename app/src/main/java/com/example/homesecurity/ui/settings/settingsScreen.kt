@@ -1,13 +1,16 @@
-package com.example.homesecurity.ui.geofencing
+package com.example.homesecurity.ui.settings
 
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,16 +20,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.homesecurity.R
 import com.google.android.gms.location.LocationServices
 
 @Composable
-fun GeofencingScreen() {
+fun SettingsScreen() {
     val context = LocalContext.current
-    val geofencingViewModel: GeofencingViewModel = viewModel()
+    val settingsViewModel: SettingsViewModel = viewModel()
 
     var lastLat by remember { mutableStateOf(0.0) }
     var lastLon by remember { mutableStateOf(0.0) }
@@ -34,7 +42,7 @@ fun GeofencingScreen() {
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
     LaunchedEffect(Unit) {
-        geofencingViewModel.startLocationUpdates(fusedLocationClient)
+        settingsViewModel.startLocationUpdates(fusedLocationClient)
     }
 
     Scaffold(
@@ -45,7 +53,20 @@ fun GeofencingScreen() {
                     .padding(padding)
                     .padding(16.dp)
             ) {
-                Button(onClick = {
+                Text(
+                    fontWeight = FontWeight.Bold,
+                    text = "Vuoi impostare una nuova posizione per la tua casa?"
+                )
+                Text(
+                    color = Color.Gray,
+                    fontSize = 14.sp,
+                    text = "Quando ti allontanerai dalla posizione, verrai automaticamente rilevato come fuori dalla casa,  e viceversa"
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.blue_medium)),
+                    onClick = {
                     if (ActivityCompat.checkSelfPermission(
                             context,
                             Manifest.permission.ACCESS_FINE_LOCATION
@@ -70,7 +91,7 @@ fun GeofencingScreen() {
                         if (location != null) {
                             lastLat = location.latitude
                             lastLon = location.longitude
-                            geofencingViewModel.updateGeofence(context, lastLat, lastLon)
+                            settingsViewModel.updateGeofence(context, lastLat, lastLon)
                             Toast.makeText(
                                 context,
                                 "Geofence set at: ${location.latitude}, ${location.longitude}",
@@ -84,8 +105,26 @@ fun GeofencingScreen() {
                             ).show()
                         }
                     }
-                }) {
-                    Text("Imposta il nuovo geofencing qui")
+                }
+                ) {
+                    Text("imposta nuova posizione")
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    fontWeight = FontWeight.Bold,
+                    text = "Vuoi eliminare il tuo Account?"
+                )
+                Text(
+                    color = Color.Gray,
+                    fontSize = 14.sp,
+                    text = "Quando eliminerai il tuo Account perderai qualsiasi informazione. Creandone uno nuovo dovrai collegare nuovamente i dispositivi."
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.dark_red)),
+                    onClick = {}
+                ) {
+                    Text("elimina account")
                 }
             }
         }

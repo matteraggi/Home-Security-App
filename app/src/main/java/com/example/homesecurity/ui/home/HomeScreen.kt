@@ -1,12 +1,18 @@
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -26,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -33,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.amplifyframework.datastore.generated.model.Person
 import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.R
@@ -62,8 +70,8 @@ fun HomeScreen(navController: NavController) {
     val buttonView = buttonViewModel.buttonState.collectAsState()
     val recordArray = recordViewModel.records.collectAsState()
 
-    val buttonColor = if (buttonView.value) colorResource(R.color.dark_red) else colorResource(R.color.dark_green)
-    val buttonText = if (buttonView.value) "OFF" else "ON"
+    val buttonColor = if (buttonView.value) colorResource(R.color.dark_green) else colorResource(R.color.dark_red)
+    val buttonText = if (buttonView.value) "ON" else "OFF"
 
     LaunchedEffect(Unit) {
         //subscribeToUpdateUser(buttonViewModel)
@@ -102,27 +110,38 @@ fun HomeScreen(navController: NavController) {
                     .padding(horizontal = 20.dp, vertical = 10.dp)
                     .fillMaxSize()
             ) {
-
-                // Testo chi è in casa
-                Text(
-                    "Chi è in casa:",
-                    modifier = Modifier.padding(vertical = 5.dp),
-                    fontSize = 20.sp
-                )
-
-                // People RecyclerView
-                peopleState.value?.let { people ->
-                    if (people.isNotEmpty()) {
-                        LazyRow(
-                            Modifier.background(colorResource(id = R.color.white))
-                        ) {
-                            items(people.size) { index ->
-                                val person = people[index]
-                                PersonBox(person)
+                // People RecyclerView with Add Button
+                Row(
+                    Modifier.background(colorResource(id = R.color.white)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    LazyRow {
+                        peopleState.value?.let { people ->
+                            if (people.isNotEmpty()) {
+                                items(people.size) { index ->
+                                    val person = people[index]
+                                    PersonBox(person)
+                                }
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp) // Dimensione del bottone
+                            .background(colorResource(id = R.color.blue_medium), CircleShape)
+                            .wrapContentSize(Alignment.Center)
+                            .clickable { /* Handle button click */ }
+                    ) {
+                        Text(
+                            text = "+",
+                            fontSize = 40.sp,
+                            color = Color.White,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
                 }
+
 
                 Spacer(modifier = Modifier.size(20.dp))
 
@@ -134,17 +153,17 @@ fun HomeScreen(navController: NavController) {
                         }
                     },
                     modifier = Modifier
-                        .size(120.dp)
+                        .size(150.dp)
                         .align(Alignment.CenterHorizontally),
                     shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(buttonColor),
+                    colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
                 ) {
                     Column {
                         Icon(
                             Icons.Default.PowerSettingsNew,
                             contentDescription = null,
                             modifier = Modifier
-                                .size(60.dp)
+                                .size(75.dp)
                                 .align(Alignment.CenterHorizontally)
                         )
                         Text(buttonText, fontSize = 25.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -166,7 +185,7 @@ fun HomeScreen(navController: NavController) {
                     recordArray.value?.let { recordsList ->
                         items(recordsList.size) { index ->
                             val record = recordsList[index]
-                            RecordBox(timestamp = record.timestamp, navController = navController)
+                            RecordBox(timestamp = record.timestamp, navController = navController, photos = record.photo)
                         }
                     }
                 }
@@ -197,19 +216,43 @@ fun PersonBox(person: Person) {
 }
 
 @Composable
-fun RecordBox(timestamp: String, navController: NavController) {
+fun RecordBox(timestamp: String, navController: NavController, photos: List<String>) {
     val formattedDate = remember {
-        val sdf = SimpleDateFormat("HH:mm:ss dd-MM-yyyy", Locale.getDefault())
+        val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
         val date = Date(timestamp.toLong() * 1000)
         sdf.format(date)
     }
 
+    val formattedTime = remember {
+        val sdf = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+        val date = Date(timestamp.toLong() * 1000)
+        sdf.format(date)
+    }
+
+    val imagePainter = rememberAsyncImagePainter(
+        model = photos.firstOrNull() ?: R.drawable.stock_image,
+        contentScale = ContentScale.Crop
+    )
+
     Card(
         onClick = { navController.navigate(NotBottomBarPages.SingleRecord.withArgs(timestamp)) },
-        modifier = Modifier.size(width = 120.dp, height = 70.dp),
+        modifier = Modifier.size(width = 100.dp, height = 200.dp),
     ) {
-        Box(modifier = Modifier.padding(8.dp)) {
-            Text(text = formattedDate, textAlign = TextAlign.Center)
+        Column(
+            modifier = Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = formattedDate, textAlign = TextAlign.Center, fontSize = 12.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Image(
+                painter = imagePainter,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(80.dp)
+                    .fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = formattedTime, textAlign = TextAlign.Center, fontSize = 12.sp)
         }
     }
     Spacer(modifier = Modifier.size(20.dp))

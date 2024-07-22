@@ -1,4 +1,4 @@
-package com.example.homesecurity.ui.geofencing
+package com.example.homesecurity.ui.settings
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel
 import com.example.homesecurity.GeofenceReceiver
 import com.google.android.gms.location.*
 
-class GeofencingViewModel : ViewModel() {
+class SettingsViewModel : ViewModel() {
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
     private lateinit var geofencingClient: GeofencingClient
