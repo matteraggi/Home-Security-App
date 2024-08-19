@@ -1,6 +1,7 @@
 package com.example.homesecurity
 
 import HomeScreen
+import MapScreen
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.homesecurity.ui.authentication.AuthScreen
 import com.example.homesecurity.ui.connectionwebview.ConnectionWebViewScreen
+import com.example.homesecurity.ui.createuser.CreateNewUserScreen
 import com.example.homesecurity.ui.createuser.CreateUserScreen
 import com.example.homesecurity.ui.record.RecordScreen
 import com.example.homesecurity.ui.settings.SettingsScreen
@@ -32,7 +34,7 @@ fun BottomNavGraph(navController: NavHostController, paddingValues: PaddingValue
         modifier = Modifier.padding(paddingValues)
     ) {
         composable(route = BottomBarScreen.Settings.route) {
-            SettingsScreen()
+            SettingsScreen(navController)
         }
         composable(route = BottomBarScreen.Record.route) {
             RecordScreen(navController)
@@ -64,6 +66,12 @@ fun BottomNavGraph(navController: NavHostController, paddingValues: PaddingValue
         }
         composable(route = NotBottomBarPages.CreateUser.route) {
             CreateUserScreen(navController)
+        }
+        composable(route = NotBottomBarPages.CreateNewUser.route) {
+            CreateNewUserScreen(navController)
+        }
+        composable(route = NotBottomBarPages.Map.route) {
+            MapScreen()
         }
     }
 }

@@ -16,20 +16,28 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class GeofenceReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context?, intent: Intent) {
+    override fun onReceive(context: Context?, intent: Intent?) {
         Log.d("GEOFENCING", "Received something")
 
-        val geofencingEvent = GeofencingEvent.fromIntent(intent)
-        if (geofencingEvent == null || geofencingEvent.hasError()) {
-            val errorMessage = geofencingEvent?.let {
-                GeofenceStatusCodes.getStatusCodeString(it.errorCode)
-            } ?: "No geofencing event found!"
-            Log.e("GEOFENCE", errorMessage)
-            return
+        if (intent != null) {
+            Log.d("GEOFENCING", "Intent action: ${intent.action}")
+        }
+        if (intent != null) {
+            Log.d("GEOFENCING", "Intent extras: ${intent.extras}")
+        }
+
+        val geofencingEvent = intent?.let { GeofencingEvent.fromIntent(it) }
+        if (geofencingEvent != null) {
+            if (geofencingEvent.hasError()) {
+                val errorMessage = GeofenceStatusCodes
+                    .getStatusCodeString(geofencingEvent.errorCode)
+                Log.e("GEOFENCING", errorMessage)
+                return
+            }
         }
 
         // Get the transition type.
-        val geofenceTransition = geofencingEvent.geofenceTransition
+        val geofenceTransition = geofencingEvent?.geofenceTransition
 
         // Test that the reported transition was of interest.
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
@@ -39,12 +47,12 @@ class GeofenceReceiver : BroadcastReceiver() {
             val triggeringGeofences = geofencingEvent.triggeringGeofences
 
             // Get the transition details as a String.
-            val geofenceDetails = triggeringGeofences.toString()
+            val geofenceDetails = triggeringGeofences?.joinToString { it.requestId }
             Toast.makeText(context, geofenceDetails, Toast.LENGTH_LONG).show()
 
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
                 handleGeofenceExit()
-            } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+            } else {
                 handleGeofenceEnter()
             }
         }

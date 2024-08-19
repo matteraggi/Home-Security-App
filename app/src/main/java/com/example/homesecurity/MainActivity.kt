@@ -1,11 +1,12 @@
 package com.example.homesecurity
 
 import android.Manifest
-import android.os.Build
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +33,9 @@ import com.amplifyframework.ui.authenticator.rememberAuthenticatorState
 import com.amplifyframework.ui.authenticator.ui.Authenticator
 import com.example.homesecurity.ui.home.getCurrentUserId
 import com.example.homesecurity.ui.home.getUser
+import com.example.homesecurity.ui.locationmap.MapViewModel
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
@@ -50,8 +54,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    private val mapViewModel: MapViewModel by viewModels()
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         Log.d("Permessi", "Calling requestPermissions() in onCreate")
         requestPermissions()
@@ -71,6 +80,16 @@ class MainActivity : AppCompatActivity() {
             } catch (error: AuthException) {
                 Log.e("AmplifyQuickstart", "Failed to fetch auth session", error)
             }
+        }
+
+        val sharedPreferences = getSharedPreferences("GeofencePrefs", Context.MODE_PRIVATE)
+        val geofenceId = sharedPreferences.getString("geofenceId", null)
+        val savedLat = sharedPreferences.getFloat("geofenceLat", 0f)
+        val savedLon = sharedPreferences.getFloat("geofenceLon", 0f)
+
+        // Ripristina il Geofence se c'è già un Geofence salvato
+        if (geofenceId != null && savedLat != 0f && savedLon != 0f) {
+            mapViewModel.updateGeofence(this, savedLat.toDouble(), savedLon.toDouble())
         }
 
         setContent {
@@ -112,14 +131,8 @@ class MainActivity : AppCompatActivity() {
         permissions.add(Manifest.permission.CHANGE_WIFI_STATE)
         permissions.add(Manifest.permission.CHANGE_NETWORK_STATE)
         permissions.add(Manifest.permission.INTERNET)
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-            permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-        }
+        permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+        permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
 
         val permissionsArray = permissions.toTypedArray()
 

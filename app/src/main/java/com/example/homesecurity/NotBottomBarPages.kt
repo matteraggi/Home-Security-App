@@ -20,6 +20,14 @@ sealed class NotBottomBarPages (
         route = "createuser",
     )
 
+    object CreateNewUser: NotBottomBarPages(
+        route = "createnewuser",
+    )
+
+    object Map: NotBottomBarPages(
+        route = "map",
+    )
+
     fun withArgs(vararg args: String): String {
         return buildString {
             append(route)

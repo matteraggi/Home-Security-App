@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
@@ -25,7 +26,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HomeSecurity"
         android:networkSecurityConfig="@xml/network_security_config"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="31">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAT7UMWW4rJBPBSoE47P_gu4aUb0bDVY9s" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -35,8 +42,11 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </activity>
-        <service android:name=".NotificationService" />
-        <receiver android:name=".GeofenceReceiver" />
-    </application>
 
+        <service android:name=".NotificationService" />
+
+        <receiver android:name=".GeofenceReceiver"
+            android:exported="true"
+            android:enabled="true"/>
+    </application>
 </manifest>

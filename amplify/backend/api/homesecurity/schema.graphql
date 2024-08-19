@@ -30,5 +30,6 @@ type User @model @auth(rules: [{allow: public}]) {
   updatedAt: String
   createdAt: String
   thingsIds: [String]
+  pin: String
 }
  

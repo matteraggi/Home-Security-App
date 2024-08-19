@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -60,7 +59,6 @@ import java.util.Locale
 
 @Composable
 fun HomeScreen(navController: NavController) {
-
     val peopleState = remember { mutableStateOf<List<Person>?>(null) }
     val isLoading = remember { mutableStateOf(true) }
     val deviceConnected = remember { mutableStateOf(true) }
@@ -115,7 +113,7 @@ fun HomeScreen(navController: NavController) {
                     Modifier.background(colorResource(id = R.color.white)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    LazyRow {
+                    LazyRow{
                         peopleState.value?.let { people ->
                             if (people.isNotEmpty()) {
                                 items(people.size) { index ->
@@ -124,24 +122,30 @@ fun HomeScreen(navController: NavController) {
                                 }
                             }
                         }
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .size(50.dp) // Dimensione del bottone
-                            .background(colorResource(id = R.color.blue_medium), CircleShape)
-                            .wrapContentSize(Alignment.Center)
-                            .clickable { /* Handle button click */ }
-                    ) {
-                        Text(
-                            text = "+",
-                            fontSize = 40.sp,
-                            color = Color.White,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
+                        item {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column{
+                                Spacer(modifier = Modifier.height(30.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .background(
+                                            colorResource(id = R.color.blue_medium),
+                                            CircleShape
+                                        )
+                                        .clickable { navController.navigate(NotBottomBarPages.CreateNewUser.route) }
+                                ) {
+                                    Text(
+                                        text = "+",
+                                        fontSize = 40.sp,
+                                        color = Color.White,
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
-
 
                 Spacer(modifier = Modifier.size(20.dp))
 
@@ -196,19 +200,15 @@ fun HomeScreen(navController: NavController) {
 
 @Composable
 fun PersonBox(person: Person) {
-    val (inside, setInside) = remember { mutableStateOf(person.inside) }
     Box(
         modifier = Modifier
             .padding(8.dp)
-            .clickable {
-                setInside(!inside)
-            }
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally){
             Icon(
                 painterResource(id = R.drawable.ic_baseline_person_24),
                 contentDescription = null,
-                tint = if(inside) Color.Black else Color.Gray,
+                tint = if(person.inside) Color.Black else Color.Gray,
                 modifier = Modifier.size(80.dp))
             Text(text = person.name, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.primary)
         }

@@ -32,6 +32,7 @@ public final class User implements Model {
   public static final QueryField UPDATED_AT = field("User", "updatedAt");
   public static final QueryField CREATED_AT = field("User", "createdAt");
   public static final QueryField THINGS_IDS = field("User", "thingsIds");
+  public static final QueryField PIN = field("User", "pin");
   private final @ModelField(targetType="ID", isRequired = true) String id;
   private final @ModelField(targetType="Person") @HasMany(associatedWith = "User", type = Person.class) List<Person> People = null;
   private final @ModelField(targetType="RecordData") @HasMany(associatedWith = "User", type = RecordData.class) List<RecordData> RecordData = null;
@@ -40,6 +41,7 @@ public final class User implements Model {
   private final @ModelField(targetType="String") String updatedAt;
   private final @ModelField(targetType="String") String createdAt;
   private final @ModelField(targetType="String") List<String> thingsIds;
+  private final @ModelField(targetType="String") String pin;
   /** @deprecated This API is internal to Amplify and should not be used. */
   @Deprecated
    public String resolveIdentifier() {
@@ -78,13 +80,18 @@ public final class User implements Model {
       return thingsIds;
   }
   
-  private User(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds) {
+  public String getPin() {
+      return pin;
+  }
+  
+  private User(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin) {
     this.id = id;
     this.alarm = alarm;
     this.deviceIds = deviceIds;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
     this.thingsIds = thingsIds;
+    this.pin = pin;
   }
   
   @Override
@@ -100,7 +107,8 @@ public final class User implements Model {
               ObjectsCompat.equals(getDeviceIds(), user.getDeviceIds()) &&
               ObjectsCompat.equals(getUpdatedAt(), user.getUpdatedAt()) &&
               ObjectsCompat.equals(getCreatedAt(), user.getCreatedAt()) &&
-              ObjectsCompat.equals(getThingsIds(), user.getThingsIds());
+              ObjectsCompat.equals(getThingsIds(), user.getThingsIds()) &&
+              ObjectsCompat.equals(getPin(), user.getPin());
       }
   }
   
@@ -113,6 +121,7 @@ public final class User implements Model {
       .append(getUpdatedAt())
       .append(getCreatedAt())
       .append(getThingsIds())
+      .append(getPin())
       .toString()
       .hashCode();
   }
@@ -126,7 +135,8 @@ public final class User implements Model {
       .append("deviceIds=" + String.valueOf(getDeviceIds()) + ", ")
       .append("updatedAt=" + String.valueOf(getUpdatedAt()) + ", ")
       .append("createdAt=" + String.valueOf(getCreatedAt()) + ", ")
-      .append("thingsIds=" + String.valueOf(getThingsIds()))
+      .append("thingsIds=" + String.valueOf(getThingsIds()) + ", ")
+      .append("pin=" + String.valueOf(getPin()))
       .append("}")
       .toString();
   }
@@ -150,6 +160,7 @@ public final class User implements Model {
       null,
       null,
       null,
+      null,
       null
     );
   }
@@ -160,7 +171,8 @@ public final class User implements Model {
       deviceIds,
       updatedAt,
       createdAt,
-      thingsIds);
+      thingsIds,
+      pin);
   }
   public interface AlarmStep {
     BuildStep alarm(Boolean alarm);
@@ -174,6 +186,7 @@ public final class User implements Model {
     BuildStep updatedAt(String updatedAt);
     BuildStep createdAt(String createdAt);
     BuildStep thingsIds(List<String> thingsIds);
+    BuildStep pin(String pin);
   }
   
 
@@ -184,17 +197,19 @@ public final class User implements Model {
     private String updatedAt;
     private String createdAt;
     private List<String> thingsIds;
+    private String pin;
     public Builder() {
       
     }
     
-    private Builder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds) {
+    private Builder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin) {
       this.id = id;
       this.alarm = alarm;
       this.deviceIds = deviceIds;
       this.updatedAt = updatedAt;
       this.createdAt = createdAt;
       this.thingsIds = thingsIds;
+      this.pin = pin;
     }
     
     @Override
@@ -207,7 +222,8 @@ public final class User implements Model {
           deviceIds,
           updatedAt,
           createdAt,
-          thingsIds);
+          thingsIds,
+          pin);
     }
     
     @Override
@@ -241,6 +257,12 @@ public final class User implements Model {
         return this;
     }
     
+    @Override
+     public BuildStep pin(String pin) {
+        this.pin = pin;
+        return this;
+    }
+    
     /**
      * @param id id
      * @return Current Builder instance, for fluent method chaining
@@ -253,8 +275,8 @@ public final class User implements Model {
   
 
   public final class CopyOfBuilder extends Builder {
-    private CopyOfBuilder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds) {
-      super(id, alarm, deviceIds, updatedAt, createdAt, thingsIds);
+    private CopyOfBuilder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin) {
+      super(id, alarm, deviceIds, updatedAt, createdAt, thingsIds, pin);
       Objects.requireNonNull(alarm);
     }
     
@@ -281,6 +303,11 @@ public final class User implements Model {
     @Override
      public CopyOfBuilder thingsIds(List<String> thingsIds) {
       return (CopyOfBuilder) super.thingsIds(thingsIds);
+    }
+    
+    @Override
+     public CopyOfBuilder pin(String pin) {
+      return (CopyOfBuilder) super.pin(pin);
     }
   }
   

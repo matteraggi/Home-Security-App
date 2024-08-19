@@ -104,7 +104,7 @@ suspend fun changeButtonState(viewModel: HomeViewModel) {
 
     val user = getUser(id)
 
-    val updatedUser = User.builder().alarm(newAlarmValue).deviceIds(user.deviceIds).updatedAt(user.updatedAt).thingsIds(user.thingsIds).id(id).build()
+    val updatedUser = User.builder().alarm(newAlarmValue).deviceIds(user.deviceIds).updatedAt(user.updatedAt).thingsIds(user.thingsIds).pin(user.pin).id(id).build()
 
     try {
         Amplify.API.mutate(
@@ -131,7 +131,7 @@ suspend fun changeButtonStateTo(state: Boolean) {
 
     val user = getUser(id)
 
-    val updatedUser = User.builder().alarm(state).deviceIds(user.deviceIds).updatedAt(user.updatedAt).thingsIds(user.thingsIds).id(id).build()
+    val updatedUser = User.builder().alarm(state).deviceIds(user.deviceIds).updatedAt(user.updatedAt).thingsIds(user.thingsIds).pin(user.pin).id(id).build()
 
     try {
         Amplify.API.mutate(

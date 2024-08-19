@@ -27,13 +27,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.homesecurity.ui.createnewuser.CreateNewUserViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun CreateUserScreen(navController: NavController) {
+fun CreateNewUserScreen(navController: NavController) {
     var userName by remember { mutableStateOf(TextFieldValue()) }
-    var physicalPin by remember { mutableStateOf(TextFieldValue()) }
-    val createNewUserViewModel: CreateUserViewModel = viewModel()
+    val createNewUserViewModel: CreateNewUserViewModel = viewModel()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -44,7 +44,7 @@ fun CreateUserScreen(navController: NavController) {
             coroutineScope.launch {
                 snackbarHostState.showSnackbar("Utente creato con successo!")
             }
-            navController.navigate("wifilist")
+            navController.navigate("home")
         }
     }
 
@@ -68,19 +68,11 @@ fun CreateUserScreen(navController: NavController) {
                     label = { Text("Nome") }
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = physicalPin,
-                    onValueChange = { physicalPin = it },
-                    label = { Text("Pin Fisico") }
-                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(onClick = {
                     createNewUserViewModel.userName = userName.text
-                    createNewUserViewModel.physicalPin = physicalPin.text
                     createNewUserViewModel.createPersonAndAddThingId()
                 }) {
                     Text("Avanti")
