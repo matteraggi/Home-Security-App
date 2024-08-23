@@ -104,7 +104,7 @@ suspend fun changeButtonState(viewModel: HomeViewModel) {
 
     val user = getUser(id)
 
-    val updatedUser = User.builder().alarm(newAlarmValue).deviceIds(user.deviceIds).updatedAt(user.updatedAt).thingsIds(user.thingsIds).pin(user.pin).id(id).build()
+    val updatedUser = User.builder().alarm(newAlarmValue).nfc(user.nfc).email(user.email).deviceIds(user.deviceIds).updatedAt(user.updatedAt).thingsIds(user.thingsIds).pin(user.pin).id(id).build()
 
     try {
         Amplify.API.mutate(
@@ -131,7 +131,33 @@ suspend fun changeButtonStateTo(state: Boolean) {
 
     val user = getUser(id)
 
-    val updatedUser = User.builder().alarm(state).deviceIds(user.deviceIds).updatedAt(user.updatedAt).thingsIds(user.thingsIds).pin(user.pin).id(id).build()
+    val updatedUser = User.builder().alarm(state).nfc(user.nfc).email(user.email).deviceIds(user.deviceIds).updatedAt(user.updatedAt).thingsIds(user.thingsIds).pin(user.pin).id(id).build()
+
+    try {
+        Amplify.API.mutate(
+            ModelMutation.update(updatedUser),
+            { _ ->
+                Log.i("Amplify Alarm Mutation", "Allarme aggiornato: $updatedUser")
+            },
+            { error ->
+                Log.e("Amplify Alarm Mutation", "Errore durante l'aggiornamento dell'utente: $error")
+            }
+        )
+    } catch (e: Exception) {
+        Log.e("Amplify Alarm Mutation", "Errore durante l'aggiornamento dell'utente: $e")
+    }
+}
+
+suspend fun registerNFC(nfc: String) {
+    val id = getCurrentUserId()
+    if (id.isEmpty()) {
+        Log.e("Amplify Alarm Mutation", "ID utente nullo o vuoto")
+        return
+    }
+
+    val user = getUser(id)
+
+    val updatedUser = User.builder().alarm(user.alarm).nfc(nfc).email(user.email).deviceIds(user.deviceIds).updatedAt(user.updatedAt).thingsIds(user.thingsIds).pin(user.pin).id(id).build()
 
     try {
         Amplify.API.mutate(

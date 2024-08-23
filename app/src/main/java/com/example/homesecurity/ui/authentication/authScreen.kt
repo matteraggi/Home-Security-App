@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -34,13 +35,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.homesecurity.R
-import com.example.homesecurity.ui.settings.AuthViewModel
 
 @Composable
 fun AuthScreen() {
     val authViewModel: AuthViewModel = viewModel()
     val pin by authViewModel.pinValue.collectAsState(initial = "")
-    val isPinVisible = remember { mutableStateOf(false) }  // Stato per controllare la visibilità del PIN
+    val isPinVisible = remember { mutableStateOf(false) }
+    val nfc by authViewModel.savedNFC.collectAsState(initial = false)
 
     if (authViewModel.showSetPinDialog) {
         SetPinDialog(viewModel = authViewModel, onDismiss = { authViewModel.dismissSetPinDialog() })
@@ -59,8 +60,13 @@ fun AuthScreen() {
                 .padding(bottom = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            CardBoxWithIconAndNumber(iconResId = R.drawable.baseline_fingerprint_24, number = "1")
-            CardBoxWithIconAndNumber(iconResId = R.drawable.baseline_nfc_24, number = "2")
+            CardBoxWithIconAndNumber(iconResId = R.drawable.baseline_fingerprint_24, number = "0")
+            if(nfc){
+                CardBoxNFC(iconResId = R.drawable.baseline_nfc_24, colorResource(R.color.dark_green))
+            }
+            else{
+                CardBoxNFC(iconResId = R.drawable.baseline_nfc_24, Color.Black)
+            }
         }
 
         Card(
@@ -69,7 +75,8 @@ fun AuthScreen() {
                 .padding(bottom = 16.dp)
                 .clickable {
                     if (pin.isNotEmpty()) {
-                        isPinVisible.value = !isPinVisible.value  // Inverti la visibilità del PIN al clic
+                        isPinVisible.value =
+                            !isPinVisible.value  // Inverti la visibilità del PIN al clic
                     } else {
                         authViewModel.showSetPinDialog()
                     }
@@ -119,8 +126,8 @@ fun AuthScreen() {
             modifier = Modifier.width(300.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            CardBoxWithIcon(iconResId = R.drawable.baseline_fingerprint_24)
-            CardBoxWithIcon(iconResId = R.drawable.baseline_nfc_24)
+            CardBoxWithIcon(iconResId = R.drawable.baseline_fingerprint_24){}
+            CardBoxWithIcon(iconResId = R.drawable.baseline_nfc_24){}
             CardBoxWithText(text = "Cambia Pin")
         }
     }
@@ -153,11 +160,37 @@ fun CardBoxWithIconAndNumber(iconResId: Int, number: String) {
 }
 
 @Composable
-fun CardBoxWithIcon(iconResId: Int) {
+fun CardBoxNFC(iconResId: Int, color: Color) {
+    Card(
+        modifier = Modifier
+            .width(140.dp)
+            .height(140.dp),
+        shape = RoundedCornerShape(8.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(id = iconResId),
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(60.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun CardBoxWithIcon(iconResId: Int, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .width(80.dp)
-            .height(80.dp),
+            .height(80.dp)
+            .clickable { onClick() },  // Aggiungi onClick
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -173,6 +206,7 @@ fun CardBoxWithIcon(iconResId: Int) {
         }
     }
 }
+
 
 @Composable
 fun CardBoxWithText(text: String) {

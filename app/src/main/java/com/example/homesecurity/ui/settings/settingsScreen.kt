@@ -16,12 +16,15 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.R
 
 @Composable
 fun SettingsScreen(navController: NavController) {
+
+    val settingsViewModel: SettingsViewModel = viewModel()
 
     Scaffold(
         content = { padding ->
@@ -38,15 +41,15 @@ fun SettingsScreen(navController: NavController) {
                 Text(
                     color = Color.Gray,
                     fontSize = 14.sp,
-                    text = "Quando ti allontanerai dalla posizione, verrai automaticamente rilevato come fuori dalla casa,  e viceversa"
+                    text = "Quando ti allontanerai dalla posizione, verrai automaticamente rilevato come fuori dalla casa, e viceversa"
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Button(
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.blue_medium)),
-                    onClick = {navController.navigate(NotBottomBarPages.Map.route)}
+                    onClick = { navController.navigate(NotBottomBarPages.Map.route) }
                 ) {
-                    Text("vedi mappa geofencing")
+                    Text("riposiziona geofencing")
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
@@ -59,9 +62,13 @@ fun SettingsScreen(navController: NavController) {
                     text = "Quando eliminerai il tuo Account perderai qualsiasi informazione. Creandone uno nuovo dovrai collegare nuovamente i dispositivi."
                 )
                 Spacer(modifier = Modifier.height(12.dp))
+
+                // Controlla se `user` è non-null prima di usare il pulsante elimina account
                 Button(
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.dark_red)),
-                    onClick = {}
+                    onClick = {
+                        settingsViewModel.deleteAccount()
+                    },
                 ) {
                     Text("elimina account")
                 }
@@ -69,5 +76,7 @@ fun SettingsScreen(navController: NavController) {
         }
     )
 }
+
+
 
 const val REQUEST_LOCATION_PERMISSION = 1

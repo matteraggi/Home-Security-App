@@ -1,9 +1,16 @@
 package com.example.homesecurity
 
 import android.Manifest
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.nfc.NfcAdapter
+import android.nfc.Tag
+import android.nfc.tech.Ndef
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -33,6 +40,7 @@ import com.amplifyframework.ui.authenticator.rememberAuthenticatorState
 import com.amplifyframework.ui.authenticator.ui.Authenticator
 import com.example.homesecurity.ui.home.getCurrentUserId
 import com.example.homesecurity.ui.home.getUser
+import com.example.homesecurity.ui.home.registerNFC
 import com.example.homesecurity.ui.locationmap.MapViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -40,6 +48,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -57,6 +66,10 @@ class MainActivity : AppCompatActivity() {
     private val mapViewModel: MapViewModel by viewModels()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    private var nfcAdapter: NfcAdapter? = null
+
+    private var isAmplifyConfigured = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -70,6 +83,7 @@ class MainActivity : AppCompatActivity() {
                 Amplify.addPlugin(AWSApiPlugin())
                 Amplify.addPlugin(AWSCognitoAuthPlugin())
                 Amplify.configure(applicationContext)
+                isAmplifyConfigured = true
                 Log.i("MyAmplifyApp", "Initialized Amplify")
             } catch (error: AmplifyException) {
                 Log.e("MyAmplifyApp", "Could not initialize Amplify", error)
@@ -91,6 +105,16 @@ class MainActivity : AppCompatActivity() {
         if (geofenceId != null && savedLat != 0f && savedLon != 0f) {
             mapViewModel.updateGeofence(this, savedLat.toDouble(), savedLon.toDouble())
         }
+
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        if (nfcAdapter == null) {
+            // NFC non supportato sul dispositivo
+            Toast.makeText(this, "NFC not supported on this device", Toast.LENGTH_SHORT).show()
+        } else if (!nfcAdapter!!.isEnabled) {
+            // NFC non abilitato
+            Toast.makeText(this, "Please enable NFC", Toast.LENGTH_SHORT).show()
+        }
+
 
         setContent {
             val authenticatorState = rememberAuthenticatorState(
@@ -122,6 +146,111 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            while (!isAmplifyConfigured) {
+                // Aspetta che Amplify sia configurato
+                delay(100)  // Attendi un po' prima di riprovare
+            }
+
+            try {
+                val userId = getCurrentUserId()
+                val user = getUser(userId)
+
+                if (user.nfc.isEmpty()) {
+                    runOnUiThread {
+                        enableForegroundDispatch()
+                    }
+                }
+            } catch (error: AuthException) {
+                Log.e("onResume", "Failed to get current user", error)
+            }
+        }
+    }
+
+
+
+    override fun onPause() {
+        super.onPause()
+        disableForegroundDispatch()
+    }
+
+    private fun enableForegroundDispatch() {
+        val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        if (nfcAdapter != null) {
+            if (nfcAdapter.isEnabled) {
+                Log.d("NFC", "NFC is enabled")
+                val pendingIntent = PendingIntent.getActivity(
+                    this, 0, Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                    PendingIntent.FLAG_MUTABLE
+                )
+                val intentFiltersArray = arrayOf(
+                    IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED),
+                    IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED),
+                    IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED)
+                )
+                nfcAdapter.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, null)
+                Log.d("NFC", "NFC foreground dispatch enabled")
+            } else {
+                Log.d("NFC", "NFC is not enabled")
+                Toast.makeText(this, "Please enable NFC", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Log.d("NFC", "NFC is not supported on this device")
+            //Toast.makeText(this, "NFC not supported on this device", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    private fun disableForegroundDispatch() {
+        nfcAdapter?.disableForegroundDispatch(this)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        Log.d("NFC", "onNewIntent called")
+        handleNfcIntent(intent)
+    }
+
+    private fun handleNfcIntent(intent: Intent) {
+        if (intent.action == NfcAdapter.ACTION_TAG_DISCOVERED ||
+            intent.action == NfcAdapter.ACTION_NDEF_DISCOVERED) {
+
+            // Recupera il tag dal Intent
+            val tag: Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
+            if (tag != null) {
+                // Recupera l'ID del tag NFC
+                val tagId = tag.id
+                val tagIdHex = tagId.joinToString(separator = "") { String.format("%02X", it) }
+                Log.d("NFC", "Tag ID: $tagIdHex")
+                CoroutineScope(Dispatchers.IO).launch {
+                    registerNFC(tagIdHex)
+                }
+
+                val ndef = Ndef.get(tag)
+                if (ndef != null) {
+                    ndef.connect()
+                    val ndefMessage = ndef.ndefMessage
+                    if (ndefMessage != null) {
+                        val text = ndefMessage.records[0].payload.toString(Charsets.UTF_8)
+                        Log.d("NFC", "NDEF Message: $text")
+                    } else {
+                        Log.d("NFC", "No NDEF messages found")
+                    }
+                    ndef.close()
+                } else {
+                    Log.d("NFC", "NDEF not supported on this tag")
+                }
+            } else {
+                Log.d("NFC", "No tag found in intent")
+            }
+        }
+    }
+
+
+
     private fun requestPermissions() {
         val permissions = mutableListOf<String>()
 
@@ -133,6 +262,7 @@ class MainActivity : AppCompatActivity() {
         permissions.add(Manifest.permission.INTERNET)
         permissions.add(Manifest.permission.POST_NOTIFICATIONS)
         permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        permissions.add(Manifest.permission.NFC)
 
         val permissionsArray = permissions.toTypedArray()
 
@@ -158,6 +288,19 @@ class MainActivity : AppCompatActivity() {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val userId = getCurrentUserId()
+                    val user = getUser(userId)
+
+                    // Controlla se il campo nfc è vuoto
+                    if (user.nfc.isEmpty()) {
+                        Log.d("NFC", "Il campo NFC dell'utente è vuoto. Attivazione della ricerca NFC.")
+                        // Attiva la ricerca NFC
+                        runOnUiThread {
+                            enableForegroundDispatch()
+                        }
+                    } else {
+                        Log.d("NFC", "Il campo NFC dell'utente non è vuoto. La ricerca NFC non è attivata.")
+                    }
+
                     checkAndUpdateDeviceId(userId, token)
                 } catch (error: AuthException) {
                     Log.e("onLoginSuccess", "Failed to get current user", error)
@@ -165,6 +308,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
 
     private fun checkAndUpdateDeviceId(userId: String, deviceId: String) {
         CoroutineScope(Dispatchers.IO).launch {

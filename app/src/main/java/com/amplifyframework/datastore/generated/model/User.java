@@ -33,6 +33,8 @@ public final class User implements Model {
   public static final QueryField CREATED_AT = field("User", "createdAt");
   public static final QueryField THINGS_IDS = field("User", "thingsIds");
   public static final QueryField PIN = field("User", "pin");
+  public static final QueryField EMAIL = field("User", "email");
+  public static final QueryField NFC = field("User", "nfc");
   private final @ModelField(targetType="ID", isRequired = true) String id;
   private final @ModelField(targetType="Person") @HasMany(associatedWith = "User", type = Person.class) List<Person> People = null;
   private final @ModelField(targetType="RecordData") @HasMany(associatedWith = "User", type = RecordData.class) List<RecordData> RecordData = null;
@@ -42,6 +44,8 @@ public final class User implements Model {
   private final @ModelField(targetType="String") String createdAt;
   private final @ModelField(targetType="String") List<String> thingsIds;
   private final @ModelField(targetType="String") String pin;
+  private final @ModelField(targetType="String") String email;
+  private final @ModelField(targetType="String") String nfc;
   /** @deprecated This API is internal to Amplify and should not be used. */
   @Deprecated
    public String resolveIdentifier() {
@@ -84,7 +88,15 @@ public final class User implements Model {
       return pin;
   }
   
-  private User(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin) {
+  public String getEmail() {
+      return email;
+  }
+  
+  public String getNfc() {
+      return nfc;
+  }
+  
+  private User(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin, String email, String nfc) {
     this.id = id;
     this.alarm = alarm;
     this.deviceIds = deviceIds;
@@ -92,6 +104,8 @@ public final class User implements Model {
     this.createdAt = createdAt;
     this.thingsIds = thingsIds;
     this.pin = pin;
+    this.email = email;
+    this.nfc = nfc;
   }
   
   @Override
@@ -108,7 +122,9 @@ public final class User implements Model {
               ObjectsCompat.equals(getUpdatedAt(), user.getUpdatedAt()) &&
               ObjectsCompat.equals(getCreatedAt(), user.getCreatedAt()) &&
               ObjectsCompat.equals(getThingsIds(), user.getThingsIds()) &&
-              ObjectsCompat.equals(getPin(), user.getPin());
+              ObjectsCompat.equals(getPin(), user.getPin()) &&
+              ObjectsCompat.equals(getEmail(), user.getEmail()) &&
+              ObjectsCompat.equals(getNfc(), user.getNfc());
       }
   }
   
@@ -122,6 +138,8 @@ public final class User implements Model {
       .append(getCreatedAt())
       .append(getThingsIds())
       .append(getPin())
+      .append(getEmail())
+      .append(getNfc())
       .toString()
       .hashCode();
   }
@@ -136,7 +154,9 @@ public final class User implements Model {
       .append("updatedAt=" + String.valueOf(getUpdatedAt()) + ", ")
       .append("createdAt=" + String.valueOf(getCreatedAt()) + ", ")
       .append("thingsIds=" + String.valueOf(getThingsIds()) + ", ")
-      .append("pin=" + String.valueOf(getPin()))
+      .append("pin=" + String.valueOf(getPin()) + ", ")
+      .append("email=" + String.valueOf(getEmail()) + ", ")
+      .append("nfc=" + String.valueOf(getNfc()))
       .append("}")
       .toString();
   }
@@ -161,6 +181,8 @@ public final class User implements Model {
       null,
       null,
       null,
+      null,
+      null,
       null
     );
   }
@@ -172,7 +194,9 @@ public final class User implements Model {
       updatedAt,
       createdAt,
       thingsIds,
-      pin);
+      pin,
+      email,
+      nfc);
   }
   public interface AlarmStep {
     BuildStep alarm(Boolean alarm);
@@ -187,6 +211,8 @@ public final class User implements Model {
     BuildStep createdAt(String createdAt);
     BuildStep thingsIds(List<String> thingsIds);
     BuildStep pin(String pin);
+    BuildStep email(String email);
+    BuildStep nfc(String nfc);
   }
   
 
@@ -198,11 +224,13 @@ public final class User implements Model {
     private String createdAt;
     private List<String> thingsIds;
     private String pin;
+    private String email;
+    private String nfc;
     public Builder() {
       
     }
     
-    private Builder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin) {
+    private Builder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin, String email, String nfc) {
       this.id = id;
       this.alarm = alarm;
       this.deviceIds = deviceIds;
@@ -210,6 +238,8 @@ public final class User implements Model {
       this.createdAt = createdAt;
       this.thingsIds = thingsIds;
       this.pin = pin;
+      this.email = email;
+      this.nfc = nfc;
     }
     
     @Override
@@ -223,7 +253,9 @@ public final class User implements Model {
           updatedAt,
           createdAt,
           thingsIds,
-          pin);
+          pin,
+          email,
+          nfc);
     }
     
     @Override
@@ -263,6 +295,18 @@ public final class User implements Model {
         return this;
     }
     
+    @Override
+     public BuildStep email(String email) {
+        this.email = email;
+        return this;
+    }
+    
+    @Override
+     public BuildStep nfc(String nfc) {
+        this.nfc = nfc;
+        return this;
+    }
+    
     /**
      * @param id id
      * @return Current Builder instance, for fluent method chaining
@@ -275,8 +319,8 @@ public final class User implements Model {
   
 
   public final class CopyOfBuilder extends Builder {
-    private CopyOfBuilder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin) {
-      super(id, alarm, deviceIds, updatedAt, createdAt, thingsIds, pin);
+    private CopyOfBuilder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin, String email, String nfc) {
+      super(id, alarm, deviceIds, updatedAt, createdAt, thingsIds, pin, email, nfc);
       Objects.requireNonNull(alarm);
     }
     
@@ -308,6 +352,16 @@ public final class User implements Model {
     @Override
      public CopyOfBuilder pin(String pin) {
       return (CopyOfBuilder) super.pin(pin);
+    }
+    
+    @Override
+     public CopyOfBuilder email(String email) {
+      return (CopyOfBuilder) super.email(email);
+    }
+    
+    @Override
+     public CopyOfBuilder nfc(String nfc) {
+      return (CopyOfBuilder) super.nfc(nfc);
     }
   }
   

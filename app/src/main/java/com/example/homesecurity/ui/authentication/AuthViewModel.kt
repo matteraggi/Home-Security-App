@@ -1,6 +1,5 @@
-package com.example.homesecurity.ui.settings
+package com.example.homesecurity.ui.authentication
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,15 +14,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-
 class AuthViewModel : ViewModel() {
     private val _pinValue = MutableStateFlow("")
     val pinValue = _pinValue.asStateFlow()
 
+    private val _savedNFC = MutableStateFlow(false)
+    val savedNFC = _savedNFC.asStateFlow()
+
     init {
-        // Fetch the pin when the ViewModel is created
         viewModelScope.launch {
             _pinValue.value = getPin()
+            _savedNFC.value = getNFC()
         }
     }
 
@@ -50,15 +51,38 @@ class AuthViewModel : ViewModel() {
                 { response ->
                     val user = response.data
                     if (user != null) {
-                        Log.i("Pin", "Retrieved pin: ${user.pin}")
                         continuation.resume(user.pin)
                     } else {
                         continuation.resume("")
                     }
                 },
                 { error ->
-                    Log.e("Pin", "Error querying user pin: $error")
                     continuation.resume("")
+                }
+            )
+        }
+    }
+
+    private suspend fun getNFC(): Boolean {
+        val id = getCurrentUserId()
+        return suspendCoroutine { continuation ->
+            Amplify.API.query(
+                ModelQuery[User::class.java, id],
+                { response ->
+                    val user = response.data
+                    if (user != null) {
+                        if(user.nfc.isNotEmpty()) {
+                            continuation.resume(true)
+                        }
+                        else{
+                            continuation.resume(false)
+                        }
+                    } else {
+                        continuation.resume(false)
+                    }
+                },
+                { error ->
+                    continuation.resume(false)
                 }
             )
         }

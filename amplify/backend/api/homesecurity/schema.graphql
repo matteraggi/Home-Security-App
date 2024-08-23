@@ -15,7 +15,6 @@ type Person @model @auth(rules: [{allow: public}]) {
   inside: Boolean!
   name: String!
   fingerprint: String
-  nfc: String
   photo: String
   updatedAt: String
   createdAt: String
@@ -31,5 +30,7 @@ type User @model @auth(rules: [{allow: public}]) {
   createdAt: String
   thingsIds: [String]
   pin: String
+  email: String
+  nfc: String
 }
  

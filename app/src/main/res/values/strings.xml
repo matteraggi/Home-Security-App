@@ -18,4 +18,6 @@
     <string name="smartobj">Smart Objects Proprietari</string>
     <string name="other_smartobj">Altri Smart Objects</string>
     <string name="add">add smart object</string>
+    <string name="service_name">nfc service</string>
+    <string name="aids_description">nfc service description</string>
 </resources>

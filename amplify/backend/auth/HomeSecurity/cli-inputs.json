@@ -6,7 +6,7 @@
     "resourceNameTruncated": "homese9982e939",
     "userPoolName": "HomeSecurity",
     "autoVerifiedAttributes": [
-      "phone_number"
+      "email"
     ],
     "mfaConfiguration": "OFF",
     "mfaTypes": [
@@ -65,4 +65,4 @@
     "dependsOn": [],
     "hostedUI": false
   }
-}
+} 

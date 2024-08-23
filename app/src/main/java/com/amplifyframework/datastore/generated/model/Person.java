@@ -32,7 +32,6 @@ public final class Person implements Model {
   public static final QueryField INSIDE = field("Person", "inside");
   public static final QueryField NAME = field("Person", "name");
   public static final QueryField FINGERPRINT = field("Person", "fingerprint");
-  public static final QueryField NFC = field("Person", "nfc");
   public static final QueryField PHOTO = field("Person", "photo");
   public static final QueryField UPDATED_AT = field("Person", "updatedAt");
   public static final QueryField CREATED_AT = field("Person", "createdAt");
@@ -41,7 +40,6 @@ public final class Person implements Model {
   private final @ModelField(targetType="Boolean", isRequired = true) Boolean inside;
   private final @ModelField(targetType="String", isRequired = true) String name;
   private final @ModelField(targetType="String") String fingerprint;
-  private final @ModelField(targetType="String") String nfc;
   private final @ModelField(targetType="String") String photo;
   private final @ModelField(targetType="String") String updatedAt;
   private final @ModelField(targetType="String") String createdAt;
@@ -71,10 +69,6 @@ public final class Person implements Model {
       return fingerprint;
   }
   
-  public String getNfc() {
-      return nfc;
-  }
-  
   public String getPhoto() {
       return photo;
   }
@@ -87,13 +81,12 @@ public final class Person implements Model {
       return createdAt;
   }
   
-  private Person(String id, User User, Boolean inside, String name, String fingerprint, String nfc, String photo, String updatedAt, String createdAt) {
+  private Person(String id, User User, Boolean inside, String name, String fingerprint, String photo, String updatedAt, String createdAt) {
     this.id = id;
     this.User = User;
     this.inside = inside;
     this.name = name;
     this.fingerprint = fingerprint;
-    this.nfc = nfc;
     this.photo = photo;
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
@@ -112,7 +105,6 @@ public final class Person implements Model {
               ObjectsCompat.equals(getInside(), person.getInside()) &&
               ObjectsCompat.equals(getName(), person.getName()) &&
               ObjectsCompat.equals(getFingerprint(), person.getFingerprint()) &&
-              ObjectsCompat.equals(getNfc(), person.getNfc()) &&
               ObjectsCompat.equals(getPhoto(), person.getPhoto()) &&
               ObjectsCompat.equals(getUpdatedAt(), person.getUpdatedAt()) &&
               ObjectsCompat.equals(getCreatedAt(), person.getCreatedAt());
@@ -127,7 +119,6 @@ public final class Person implements Model {
       .append(getInside())
       .append(getName())
       .append(getFingerprint())
-      .append(getNfc())
       .append(getPhoto())
       .append(getUpdatedAt())
       .append(getCreatedAt())
@@ -144,7 +135,6 @@ public final class Person implements Model {
       .append("inside=" + String.valueOf(getInside()) + ", ")
       .append("name=" + String.valueOf(getName()) + ", ")
       .append("fingerprint=" + String.valueOf(getFingerprint()) + ", ")
-      .append("nfc=" + String.valueOf(getNfc()) + ", ")
       .append("photo=" + String.valueOf(getPhoto()) + ", ")
       .append("updatedAt=" + String.valueOf(getUpdatedAt()) + ", ")
       .append("createdAt=" + String.valueOf(getCreatedAt()))
@@ -173,7 +163,6 @@ public final class Person implements Model {
       null,
       null,
       null,
-      null,
       null
     );
   }
@@ -184,7 +173,6 @@ public final class Person implements Model {
       inside,
       name,
       fingerprint,
-      nfc,
       photo,
       updatedAt,
       createdAt);
@@ -204,7 +192,6 @@ public final class Person implements Model {
     BuildStep id(String id);
     BuildStep user(User user);
     BuildStep fingerprint(String fingerprint);
-    BuildStep nfc(String nfc);
     BuildStep photo(String photo);
     BuildStep updatedAt(String updatedAt);
     BuildStep createdAt(String createdAt);
@@ -217,7 +204,6 @@ public final class Person implements Model {
     private String name;
     private User User;
     private String fingerprint;
-    private String nfc;
     private String photo;
     private String updatedAt;
     private String createdAt;
@@ -225,13 +211,12 @@ public final class Person implements Model {
       
     }
     
-    private Builder(String id, User User, Boolean inside, String name, String fingerprint, String nfc, String photo, String updatedAt, String createdAt) {
+    private Builder(String id, User User, Boolean inside, String name, String fingerprint, String photo, String updatedAt, String createdAt) {
       this.id = id;
       this.User = User;
       this.inside = inside;
       this.name = name;
       this.fingerprint = fingerprint;
-      this.nfc = nfc;
       this.photo = photo;
       this.updatedAt = updatedAt;
       this.createdAt = createdAt;
@@ -247,7 +232,6 @@ public final class Person implements Model {
           inside,
           name,
           fingerprint,
-          nfc,
           photo,
           updatedAt,
           createdAt);
@@ -276,12 +260,6 @@ public final class Person implements Model {
     @Override
      public BuildStep fingerprint(String fingerprint) {
         this.fingerprint = fingerprint;
-        return this;
-    }
-    
-    @Override
-     public BuildStep nfc(String nfc) {
-        this.nfc = nfc;
         return this;
     }
     
@@ -315,8 +293,8 @@ public final class Person implements Model {
   
 
   public final class CopyOfBuilder extends Builder {
-    private CopyOfBuilder(String id, User user, Boolean inside, String name, String fingerprint, String nfc, String photo, String updatedAt, String createdAt) {
-      super(id, User, inside, name, fingerprint, nfc, photo, updatedAt, createdAt);
+    private CopyOfBuilder(String id, User user, Boolean inside, String name, String fingerprint, String photo, String updatedAt, String createdAt) {
+      super(id, User, inside, name, fingerprint, photo, updatedAt, createdAt);
       Objects.requireNonNull(inside);
       Objects.requireNonNull(name);
     }
@@ -339,11 +317,6 @@ public final class Person implements Model {
     @Override
      public CopyOfBuilder fingerprint(String fingerprint) {
       return (CopyOfBuilder) super.fingerprint(fingerprint);
-    }
-    
-    @Override
-     public CopyOfBuilder nfc(String nfc) {
-      return (CopyOfBuilder) super.nfc(nfc);
     }
     
     @Override
