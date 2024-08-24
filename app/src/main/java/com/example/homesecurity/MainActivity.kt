@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
@@ -53,12 +54,29 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
+    // Modifica il callback per gestire la richiesta del permesso di accesso alla posizione in background
     private val requestPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             permissions.entries.forEach {
                 Log.d("Permessi", "${it.key} = ${it.value}")
                 if (!it.value) {
                     Log.e("Permessi", "Permesso negato: ${it.key}")
+                }
+            }
+
+            // Se i permessi per la posizione in primo piano sono stati concessi, richiedi il permesso per la posizione in background
+            if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
+
+                // Verifica se il permesso per la posizione in background è già stato concesso
+                if (checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // Mostra una spiegazione e poi richiedi il permesso
+                    if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+                        // Mostra una spiegazione
+                        Toast.makeText(this, "Il permesso di accesso alla posizione in background è necessario per alcune funzionalità dell'app.", Toast.LENGTH_LONG).show()
+                    }
+                    // Richiedi il permesso di accesso alla posizione in background
+                    requestBackgroundLocationPermission()
                 }
             }
         }
@@ -261,12 +279,21 @@ class MainActivity : AppCompatActivity() {
         permissions.add(Manifest.permission.CHANGE_NETWORK_STATE)
         permissions.add(Manifest.permission.INTERNET)
         permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-        permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         permissions.add(Manifest.permission.NFC)
 
         val permissionsArray = permissions.toTypedArray()
 
         Log.d("Permessi", "Richiesta di permessi: ${permissionsArray.joinToString()}")
+
+        requestPermissionsLauncher.launch(permissionsArray)
+    }
+
+    private fun requestBackgroundLocationPermission() {
+        val permissions = mutableListOf<String>()
+
+        permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+
+        val permissionsArray = permissions.toTypedArray()
 
         requestPermissionsLauncher.launch(permissionsArray)
     }

@@ -28,6 +28,10 @@ sealed class NotBottomBarPages (
         route = "map",
     )
 
+    object Live: NotBottomBarPages(
+        route = "live",
+    )
+
     fun withArgs(vararg args: String): String {
         return buildString {
             append(route)

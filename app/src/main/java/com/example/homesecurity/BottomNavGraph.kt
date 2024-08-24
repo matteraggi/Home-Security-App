@@ -17,6 +17,7 @@ import com.example.homesecurity.ui.authentication.AuthScreen
 import com.example.homesecurity.ui.connectionwebview.ConnectionWebViewScreen
 import com.example.homesecurity.ui.createuser.CreateNewUserScreen
 import com.example.homesecurity.ui.createuser.CreateUserScreen
+import com.example.homesecurity.ui.live.LiveScreen
 import com.example.homesecurity.ui.record.RecordScreen
 import com.example.homesecurity.ui.settings.SettingsScreen
 import com.example.homesecurity.ui.singlerecord.SingleRecordScreen
@@ -72,6 +73,9 @@ fun BottomNavGraph(navController: NavHostController, paddingValues: PaddingValue
         }
         composable(route = NotBottomBarPages.Map.route) {
             MapScreen()
+        }
+        composable(route = NotBottomBarPages.Live.route) {
+            LiveScreen()
         }
     }
 }

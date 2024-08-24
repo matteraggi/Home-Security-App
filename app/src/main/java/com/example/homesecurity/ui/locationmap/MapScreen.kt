@@ -3,6 +3,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,6 +38,7 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+
 @Composable
 fun MapScreen() {
     val settingsViewModel: MapViewModel = viewModel()
@@ -45,7 +47,6 @@ fun MapScreen() {
     var lastLat by remember { mutableDoubleStateOf(0.0) }
     var lastLon by remember { mutableDoubleStateOf(0.0) }
 
-    // Retrieve the geofence position from SharedPreferences
     val sharedPreferences = context.getSharedPreferences("GeofencePrefs", Context.MODE_PRIVATE)
     val geofenceLat = sharedPreferences.getFloat("geofenceLat", 0f)
     val geofenceLon = sharedPreferences.getFloat("geofenceLon", 0f)
@@ -87,9 +88,9 @@ fun MapScreen() {
                 if (location != null) {
                     lastLat = location.latitude
                     lastLon = location.longitude
-                    // Center the camera on the current location
                     cameraPositionState.position = CameraPosition.fromLatLngZoom(LatLng(lastLat, lastLon), 15f)
                 }
+                Log.d("geofence", "$geofenceLat, $geofenceLon")
             }
         }
     }
@@ -99,24 +100,29 @@ fun MapScreen() {
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState
         ) {
-            // Marker for the current location
+            // Marker for the current location with a custom icon
             if (lastLat != 0.0 && lastLon != 0.0) {
                 val currentMarkerState = rememberMarkerState(position = LatLng(lastLat, lastLon))
-                Marker(state = currentMarkerState, title = "Current Location")
+                Marker(
+                    state = currentMarkerState,
+                    title = "Current Location",
+                )
             }
 
-            // Marker and Circle for the geofence location
+            // Marker and Circle for the geofence location with a custom icon
             if (geofenceLat != 0f && geofenceLon != 0f) {
                 val geofenceLatLng = LatLng(geofenceLat.toDouble(), geofenceLon.toDouble())
                 val geofenceMarkerState = rememberMarkerState(position = geofenceLatLng)
-                Marker(state = geofenceMarkerState, title = "Geofence Location")
-
+                Marker(
+                    state = geofenceMarkerState,
+                    title = "Geofence Location",
+                )
                 Circle(
                     center = geofenceLatLng,
-                    radius = 1000.0, // Radius in meters
+                    radius = 1000.0,
                     strokeColor = Color.Blue,
                     strokeWidth = 2f,
-                    fillColor = Color.Blue.copy(alpha = 0.2f)
+                    fillColor = Color.Blue.copy(alpha = 0.5f)
                 )
             }
         }
@@ -157,7 +163,6 @@ fun MapScreen() {
                             "Geofence set at: ${location.latitude}, ${location.longitude}",
                             Toast.LENGTH_LONG
                         ).show()
-                        // Move camera to the new location
                         cameraPositionState.position = CameraPosition.fromLatLngZoom(LatLng(lastLat, lastLon), 15f)
                     } else {
                         Toast.makeText(

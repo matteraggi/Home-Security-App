@@ -176,6 +176,21 @@ fun HomeScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.size(20.dp))
 
+                /*
+                Button(
+                    onClick = {
+                        navController.navigate(NotBottomBarPages.Live.route)
+                    },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally),
+                ){
+                    Text("Live Camera")
+                }
+
+                Spacer(modifier = Modifier.size(20.dp))
+
+                 */
+
                 Text(
                     "Ultimi Record:",
                     modifier = Modifier.padding(vertical = 10.dp),
