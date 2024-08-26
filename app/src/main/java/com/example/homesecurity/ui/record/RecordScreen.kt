@@ -1,5 +1,7 @@
 package com.example.homesecurity.ui.record
 
+import android.graphics.BitmapFactory
+import android.util.Base64
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +24,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -36,7 +40,6 @@ import java.util.Locale
 
 @Composable
 fun RecordScreen(navController: NavController) {
-
     val recordViewModel = viewModel<RecordViewModel>()
     val recordArray = recordViewModel.records.collectAsState()
 
@@ -53,13 +56,12 @@ fun RecordScreen(navController: NavController) {
             recordArray.value?.let { recordsList ->
                 items(recordsList.size) { index ->
                     val record = recordsList[index]
-                    RecordLine(timestamp = record.timestamp, navController = navController, photos = record.photo)
+                    RecordLine(timestamp = record.timestamp, navController = navController, photos = record.photoBase64)
                 }
             }
         }
     }
 }
-
 @Composable
 fun RecordLine(timestamp: String, navController: NavController, photos: List<String>) {
     val formattedDate = remember {
@@ -98,19 +100,33 @@ fun RecordLine(timestamp: String, navController: NavController, photos: List<Str
                     .height(80.dp)
             ) {
                 if (photos.isNotEmpty()) {
-                    items(photos.size) { photo ->
-                        Image(
-                            painter = painterResource(id = photo.toInt()), // Assuming photos are resource IDs
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding(4.dp),
-                            contentScale = ContentScale.FillHeight
-                        )
+                    items(photos.size) { index ->
+                        val photoBitmap = decodeBase64Image(photos[index])
+                        if (photoBitmap != null) {
+                            Image(
+                                bitmap = photoBitmap,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(80.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            // Fallback image in case of decode failure
+                            Image(
+                                painter = painterResource(id = R.drawable.stock_image),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .padding(4.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
                     }
                 } else {
-                    items(4) {
+                    items(1) {
                         Image(
-                            painter = painterResource(id = R.drawable.stock_image), // Replace with your stock image resource ID
+                            painter = painterResource(id = R.drawable.stock_image),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(80.dp)
@@ -123,4 +139,16 @@ fun RecordLine(timestamp: String, navController: NavController, photos: List<Str
         }
     }
     Spacer(modifier = Modifier.size(20.dp))
+}
+
+@Composable
+fun decodeBase64Image(base64String: String): ImageBitmap? {
+    return try {
+        val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        bitmap?.asImageBitmap()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
 }

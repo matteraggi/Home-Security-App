@@ -1,5 +1,8 @@
 package com.example.homesecurity.ui.home
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
 import android.util.Log
 import com.amplifyframework.api.graphql.model.ModelMutation
 import com.amplifyframework.api.graphql.model.ModelQuery
@@ -171,5 +174,15 @@ suspend fun registerNFC(nfc: String) {
         )
     } catch (e: Exception) {
         Log.e("Amplify Alarm Mutation", "Errore durante l'aggiornamento dell'utente: $e")
+    }
+}
+
+fun decodeBase64ToBitmap(base64Str: String): Bitmap? {
+    return try {
+        val decodedBytes = Base64.decode(base64Str, Base64.DEFAULT)
+        BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+    } catch (e: IllegalArgumentException) {
+        e.printStackTrace()
+        null
     }
 }

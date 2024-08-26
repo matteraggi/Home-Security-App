@@ -17,6 +17,12 @@
       },
       "auth": {
         "HomeSecurity": {}
+      },
+      "storage": {
+        "homesecuritya98d9b32": {
+          "bucketName": "home-security-s3e4ec0-staging",
+          "region": "eu-west-3"
+        }
       }
     }
   }

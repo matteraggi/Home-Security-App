@@ -1,4 +1,4 @@
-package com.example.homesecurity.ui.record
+package com.example.homesecurity.ui.singlerecord
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -10,35 +10,39 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlin.coroutines.suspendCoroutine
 
-class RecordViewModel : ViewModel()  {
+class SingleRecordViewModel : ViewModel()  {
 
-    private val _records = MutableStateFlow<List<RecordData>?>(null)
-    val records = _records.asStateFlow()
+    private val _record = MutableStateFlow<RecordData?>(null)
+    val record = _record.asStateFlow()
 
-    suspend fun listRecords(): List<RecordData> {
+    suspend fun getRecord(timestamp: String): RecordData? {
         val id = getCurrentUserId()
         Log.i("Record", "ID ottenuto: $id")
         if (id.isEmpty()) {
             Log.e("Record", "ID utente nullo o vuoto")
+            return null
         }
-        val recordList = mutableListOf<RecordData>() // Lista temporanea per memorizzare i dati
 
         return suspendCoroutine { continuation ->
             Amplify.API.query(
                 ModelQuery.list(RecordData::class.java, RecordData.USER.contains(id)),
                 { response ->
+                    var foundRecord: RecordData? = null
                     response.data.forEach { record ->
-                        recordList.add(record)
-                        Log.i("Record","Record: $record")
+                        if (record.timestamp == timestamp) {
+                            foundRecord = record
+                            Log.i("Record", "Record trovato: $record")
+                            return@forEach
+                        }
                     }
 
-                    // Ordina la lista in base al timestamp in ordine decrescente
-                    val sortedList = recordList.sortedByDescending { it.timestamp.toLongOrNull() }
-
-                    // Aggiorna lo StateFlow con la lista ordinata
-                    _records.value = sortedList
-
-                    continuation.resumeWith(Result.success(sortedList))
+                    if (foundRecord != null) {
+                        _record.value = foundRecord
+                        continuation.resumeWith(Result.success(foundRecord))
+                    } else {
+                        Log.e("Record", "Nessun record trovato con il timestamp specificato")
+                        continuation.resumeWith(Result.success(null))
+                    }
                 },
                 { exception ->
                     Log.e("Record", "Query failure", exception)

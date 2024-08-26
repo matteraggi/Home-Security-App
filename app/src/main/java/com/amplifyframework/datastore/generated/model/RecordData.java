@@ -33,12 +33,14 @@ public final class RecordData implements Model {
   public static final QueryField PHOTO = field("RecordData", "photo");
   public static final QueryField CREATED_AT = field("RecordData", "createdAt");
   public static final QueryField UPDATED_AT = field("RecordData", "updatedAt");
+  public static final QueryField PHOTO_BASE64 = field("RecordData", "photoBase64");
   private final @ModelField(targetType="ID", isRequired = true) String id;
   private final @ModelField(targetType="User") @BelongsTo(targetName = "userID", targetNames = {"userID"}, type = User.class) User User;
   private final @ModelField(targetType="String", isRequired = true) String timestamp;
   private final @ModelField(targetType="String") List<String> photo;
   private final @ModelField(targetType="String") String createdAt;
   private final @ModelField(targetType="String") String updatedAt;
+  private final @ModelField(targetType="String") List<String> photoBase64;
   /** @deprecated This API is internal to Amplify and should not be used. */
   @Deprecated
    public String resolveIdentifier() {
@@ -69,13 +71,18 @@ public final class RecordData implements Model {
       return updatedAt;
   }
   
-  private RecordData(String id, User User, String timestamp, List<String> photo, String createdAt, String updatedAt) {
+  public List<String> getPhotoBase64() {
+      return photoBase64;
+  }
+  
+  private RecordData(String id, User User, String timestamp, List<String> photo, String createdAt, String updatedAt, List<String> photoBase64) {
     this.id = id;
     this.User = User;
     this.timestamp = timestamp;
     this.photo = photo;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.photoBase64 = photoBase64;
   }
   
   @Override
@@ -91,7 +98,8 @@ public final class RecordData implements Model {
               ObjectsCompat.equals(getTimestamp(), recordData.getTimestamp()) &&
               ObjectsCompat.equals(getPhoto(), recordData.getPhoto()) &&
               ObjectsCompat.equals(getCreatedAt(), recordData.getCreatedAt()) &&
-              ObjectsCompat.equals(getUpdatedAt(), recordData.getUpdatedAt());
+              ObjectsCompat.equals(getUpdatedAt(), recordData.getUpdatedAt()) &&
+              ObjectsCompat.equals(getPhotoBase64(), recordData.getPhotoBase64());
       }
   }
   
@@ -104,6 +112,7 @@ public final class RecordData implements Model {
       .append(getPhoto())
       .append(getCreatedAt())
       .append(getUpdatedAt())
+      .append(getPhotoBase64())
       .toString()
       .hashCode();
   }
@@ -117,7 +126,8 @@ public final class RecordData implements Model {
       .append("timestamp=" + String.valueOf(getTimestamp()) + ", ")
       .append("photo=" + String.valueOf(getPhoto()) + ", ")
       .append("createdAt=" + String.valueOf(getCreatedAt()) + ", ")
-      .append("updatedAt=" + String.valueOf(getUpdatedAt()))
+      .append("updatedAt=" + String.valueOf(getUpdatedAt()) + ", ")
+      .append("photoBase64=" + String.valueOf(getPhotoBase64()))
       .append("}")
       .toString();
   }
@@ -141,6 +151,7 @@ public final class RecordData implements Model {
       null,
       null,
       null,
+      null,
       null
     );
   }
@@ -151,7 +162,8 @@ public final class RecordData implements Model {
       timestamp,
       photo,
       createdAt,
-      updatedAt);
+      updatedAt,
+      photoBase64);
   }
   public interface TimestampStep {
     BuildStep timestamp(String timestamp);
@@ -165,6 +177,7 @@ public final class RecordData implements Model {
     BuildStep photo(List<String> photo);
     BuildStep createdAt(String createdAt);
     BuildStep updatedAt(String updatedAt);
+    BuildStep photoBase64(List<String> photoBase64);
   }
   
 
@@ -175,17 +188,19 @@ public final class RecordData implements Model {
     private List<String> photo;
     private String createdAt;
     private String updatedAt;
+    private List<String> photoBase64;
     public Builder() {
       
     }
     
-    private Builder(String id, User User, String timestamp, List<String> photo, String createdAt, String updatedAt) {
+    private Builder(String id, User User, String timestamp, List<String> photo, String createdAt, String updatedAt, List<String> photoBase64) {
       this.id = id;
       this.User = User;
       this.timestamp = timestamp;
       this.photo = photo;
       this.createdAt = createdAt;
       this.updatedAt = updatedAt;
+      this.photoBase64 = photoBase64;
     }
     
     @Override
@@ -198,7 +213,8 @@ public final class RecordData implements Model {
           timestamp,
           photo,
           createdAt,
-          updatedAt);
+          updatedAt,
+          photoBase64);
     }
     
     @Override
@@ -232,6 +248,12 @@ public final class RecordData implements Model {
         return this;
     }
     
+    @Override
+     public BuildStep photoBase64(List<String> photoBase64) {
+        this.photoBase64 = photoBase64;
+        return this;
+    }
+    
     /**
      * @param id id
      * @return Current Builder instance, for fluent method chaining
@@ -244,8 +266,8 @@ public final class RecordData implements Model {
   
 
   public final class CopyOfBuilder extends Builder {
-    private CopyOfBuilder(String id, User user, String timestamp, List<String> photo, String createdAt, String updatedAt) {
-      super(id, User, timestamp, photo, createdAt, updatedAt);
+    private CopyOfBuilder(String id, User user, String timestamp, List<String> photo, String createdAt, String updatedAt, List<String> photoBase64) {
+      super(id, User, timestamp, photo, createdAt, updatedAt, photoBase64);
       Objects.requireNonNull(timestamp);
     }
     
@@ -272,6 +294,11 @@ public final class RecordData implements Model {
     @Override
      public CopyOfBuilder updatedAt(String updatedAt) {
       return (CopyOfBuilder) super.updatedAt(updatedAt);
+    }
+    
+    @Override
+     public CopyOfBuilder photoBase64(List<String> photoBase64) {
+      return (CopyOfBuilder) super.photoBase64(photoBase64);
     }
   }
   

@@ -6,6 +6,7 @@ type RecordData @model @auth(rules: [{allow: public}]) {
   photo: [String!]
   createdAt: String
   updatedAt: String
+  photoBase64: [String]
 }
 
 type Person @model @auth(rules: [{allow: public}]) {

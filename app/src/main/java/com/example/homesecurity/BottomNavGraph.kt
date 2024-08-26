@@ -44,7 +44,7 @@ fun BottomNavGraph(navController: NavHostController, paddingValues: PaddingValue
             HomeScreen(navController)
         }
         composable(route = BottomBarScreen.SmartObj.route) {
-            SmartObjScreen()
+            SmartObjScreen(navController)
         }
         composable(route = BottomBarScreen.Geofencing.route) {
             AuthScreen()
@@ -57,7 +57,7 @@ fun BottomNavGraph(navController: NavHostController, paddingValues: PaddingValue
                 nullable = true
             })
         ) { entry ->
-            SingleRecordScreen(timestamp = entry.arguments?.getString("timestamp"))
+            entry.arguments?.getString("timestamp")?.let { SingleRecordScreen(timestamp = it) }
         }
         composable(route = NotBottomBarPages.WifiList.route) {
             WifiListScreen(navController)

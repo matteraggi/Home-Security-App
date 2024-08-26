@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -39,12 +40,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
 import com.amplifyframework.datastore.generated.model.Person
 import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.R
 import com.example.homesecurity.ui.home.HomeViewModel
 import com.example.homesecurity.ui.home.changeButtonState
+import com.example.homesecurity.ui.home.decodeBase64ToBitmap
 import com.example.homesecurity.ui.home.getCurrentUserId
 import com.example.homesecurity.ui.home.getHomePeople
 import com.example.homesecurity.ui.home.getUser
@@ -204,7 +205,7 @@ fun HomeScreen(navController: NavController) {
                     recordArray.value?.let { recordsList ->
                         items(recordsList.size) { index ->
                             val record = recordsList[index]
-                            RecordBox(timestamp = record.timestamp, navController = navController, photos = record.photo)
+                            RecordBox(timestamp = record.timestamp, navController = navController, photos = record.photoBase64)
                         }
                     }
                 }
@@ -244,10 +245,9 @@ fun RecordBox(timestamp: String, navController: NavController, photos: List<Stri
         sdf.format(date)
     }
 
-    val imagePainter = rememberAsyncImagePainter(
-        model = photos.firstOrNull() ?: R.drawable.stock_image,
-        contentScale = ContentScale.Crop
-    )
+    val bitmap = remember(photos) {
+        photos.firstOrNull()?.let { decodeBase64ToBitmap(it) }
+    }
 
     Card(
         onClick = { navController.navigate(NotBottomBarPages.SingleRecord.withArgs(timestamp)) },
@@ -259,13 +259,27 @@ fun RecordBox(timestamp: String, navController: NavController, photos: List<Stri
         ) {
             Text(text = formattedDate, textAlign = TextAlign.Center, fontSize = 12.sp)
             Spacer(modifier = Modifier.height(8.dp))
-            Image(
-                painter = imagePainter,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(80.dp)
-                    .fillMaxWidth()
-            )
+
+            if (bitmap != null) {
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = "Record Image",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .fillMaxWidth(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.stock_image),
+                    contentDescription = "Placeholder Image",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .fillMaxWidth(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = formattedTime, textAlign = TextAlign.Center, fontSize = 12.sp)
         }

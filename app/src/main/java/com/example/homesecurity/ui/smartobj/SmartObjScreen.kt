@@ -24,10 +24,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.R
 
 @Composable
-fun SmartObjScreen() {
+fun SmartObjScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -61,29 +63,33 @@ fun SmartObjScreen() {
         ) {
             DeviceOption(
                 label = "Sensore",
-                icon = R.drawable.baseline_sensors_24 // Sostituire con la risorsa appropriata
+                icon = R.drawable.baseline_sensors_24,
+                onClick = {
+                    navController.navigate(NotBottomBarPages.WifiList.route)
+                }
             )
             Spacer(modifier = Modifier.height(24.dp))
             DeviceOption(
                 label = "Camera",
-                icon = R.drawable.baseline_camera_indoor_24 // Sostituire con la risorsa appropriata
+                icon = R.drawable.baseline_camera_indoor_24,
+                onClick = {}
             )
             Spacer(modifier = Modifier.height(24.dp))
             DeviceOption(
                 label = "Sensore Porta",
-                icon = R.drawable.baseline_sensor_door_24 // Sostituire con la risorsa appropriata
+                icon = R.drawable.baseline_sensor_door_24,
+                onClick = {}
             )
         }
     }
 }
 
 @Composable
-fun DeviceOption(label: String, icon: Int) {
+fun DeviceOption(label: String, icon: Int, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(80.dp)
-            .clickable { /* Handle item click */ }
             .padding(
                 horizontal = 12.dp
             ),
@@ -92,8 +98,9 @@ fun DeviceOption(label: String, icon: Int) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .padding(8.dp)
+                .clickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(

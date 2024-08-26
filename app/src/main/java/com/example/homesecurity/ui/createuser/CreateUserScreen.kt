@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.homesecurity.NotBottomBarPages
 import kotlinx.coroutines.launch
 
 @Composable
@@ -44,7 +45,7 @@ fun CreateUserScreen(navController: NavController) {
             coroutineScope.launch {
                 snackbarHostState.showSnackbar("Utente creato con successo!")
             }
-            navController.navigate("wifilist")
+            navController.navigate(NotBottomBarPages.WifiList.route)
         }
     }
 

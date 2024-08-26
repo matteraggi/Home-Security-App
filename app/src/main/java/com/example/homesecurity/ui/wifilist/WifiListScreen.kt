@@ -113,7 +113,6 @@ fun WifiListScreen(navController: NavController) {
     }
 }
 
-
 @Composable
 fun ArrowButton(viewModel: WifiListViewModel, navController: NavController) {
     val arrowButtonEnabled by viewModel.arrowButtonEnabled.collectAsState()
@@ -134,7 +133,7 @@ fun ArrowButton(viewModel: WifiListViewModel, navController: NavController) {
                 }
             ) {
                 Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_dashboard_black_24dp),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.baseline_arrow_forward_24),
                     contentDescription = "Navigate to WebView"
                 )
             }
