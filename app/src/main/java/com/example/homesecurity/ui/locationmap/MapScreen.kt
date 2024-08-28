@@ -119,7 +119,8 @@ fun MapScreen() {
                 )
                 Circle(
                     center = geofenceLatLng,
-                    radius = 1000.0,
+                    //radius = 1000.0,
+                    radius = 20.0,
                     strokeColor = Color.Blue,
                     strokeWidth = 2f,
                     fillColor = Color.Blue.copy(alpha = 0.5f)

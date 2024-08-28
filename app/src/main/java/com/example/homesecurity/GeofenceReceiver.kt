@@ -6,8 +6,6 @@ import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import com.example.homesecurity.ui.home.changeButtonStateTo
-import com.example.homesecurity.ui.home.getCurrentUserId
-import com.example.homesecurity.ui.home.getHomePeople
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingEvent
@@ -60,13 +58,14 @@ class GeofenceReceiver : BroadcastReceiver() {
 
     private fun handleGeofenceExit() {
         CoroutineScope(Dispatchers.IO).launch {
+            /*
             val people = getHomePeople(getCurrentUserId())
             val anyInside = people.any { it.inside }
 
-            if (!anyInside) {
+            if (!anyInside) {*/
                 // If no persons inside, activate the alarm
                 changeButtonStateTo(true)
-            }
+            //}
         }
     }
 
