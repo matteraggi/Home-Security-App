@@ -1,5 +1,6 @@
 package com.example.homesecurity.ui.home
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
@@ -184,5 +185,52 @@ fun decodeBase64ToBitmap(base64Str: String): Bitmap? {
     } catch (e: IllegalArgumentException) {
         e.printStackTrace()
         null
+    }
+}
+
+fun getSelectedPerson(context: Context): String? {
+    val sharedPref = context.getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
+    return sharedPref.getString("selected_person_id", null)
+}
+
+suspend fun getPerson(id: String): Person? {
+    return suspendCoroutine { continuation ->
+        Amplify.API.query(
+            ModelQuery[Person::class.java, id],
+            { response ->
+                val person = response.data
+                if (person != null) {
+                    continuation.resume(person)
+                } else {
+                    continuation.resume(null)
+                }
+            },
+            { error ->
+                Log.e("Person", "Query failure", error)
+                continuation.resume(null)
+            }
+        )
+    }
+}
+
+suspend fun changePersonInside(context: Context, state: Boolean){
+    val personId = getSelectedPerson(context) ?: return
+
+    val person = getPerson(personId) ?: return
+
+    val updatedPerson = Person.builder().inside(state).name(person.name).updatedAt(person.updatedAt).id(personId).user(person.user).createdAt(person.createdAt).photo(person.photo).build()
+
+    try {
+        Amplify.API.mutate(
+            ModelMutation.update(updatedPerson),
+            { _ ->
+                Log.i("Amplify Alarm Mutation", "Allarme aggiornato: $updatedPerson")
+            },
+            { error ->
+                Log.e("Amplify Alarm Mutation", "Errore durante l'aggiornamento dell'utente: $error")
+            }
+        )
+    } catch (e: Exception) {
+        Log.e("Amplify Alarm Mutation", "Errore durante l'aggiornamento dell'utente: $e")
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavDestination
@@ -22,6 +23,25 @@ import com.amplifyframework.ui.authenticator.SignedInState
 @Composable
 fun MainScreen(state: SignedInState) {
     val navController = rememberNavController()
+    val context = LocalContext.current
+
+    /*
+    LaunchedEffect(Unit) {
+        if(state.step == AuthenticatorStep.SignedIn) {
+            val selectedPersonId = getSelectedPerson(context)
+
+            if (selectedPersonId == null) {
+                navController.navigate(BottomBarScreen.Settings.route)
+                Toast.makeText(
+                    context,
+                    "seleziona un utente",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+    */
+
 
     Scaffold(
         bottomBar = { BottomBar(navController = navController) }

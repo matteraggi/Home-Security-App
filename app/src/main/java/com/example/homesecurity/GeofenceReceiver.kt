@@ -6,6 +6,7 @@ import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import com.example.homesecurity.ui.home.changeButtonStateTo
+import com.example.homesecurity.ui.home.changePersonInside
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingEvent
@@ -49,15 +50,20 @@ class GeofenceReceiver : BroadcastReceiver() {
             Toast.makeText(context, geofenceDetails, Toast.LENGTH_LONG).show()
 
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                handleGeofenceExit()
+                if (context != null) {
+                    handleGeofenceExit(context)
+                }
             } else {
-                handleGeofenceEnter()
+                if (context != null) {
+                    handleGeofenceEnter(context)
+                }
             }
         }
     }
 
-    private fun handleGeofenceExit() {
+    private fun handleGeofenceExit(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
+            changePersonInside(context, false)
             /*
             val people = getHomePeople(getCurrentUserId())
             val anyInside = people.any { it.inside }
@@ -69,10 +75,13 @@ class GeofenceReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun handleGeofenceEnter() {
-        // Deactivate the alarm when entering the geofence
+    private fun handleGeofenceEnter(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
-            changeButtonStateTo(false)
+            changePersonInside(context, true)
+            // Deactivate the alarm when entering the geofence
+            CoroutineScope(Dispatchers.IO).launch {
+                changeButtonStateTo(false)
+            }
         }
     }
 

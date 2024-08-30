@@ -41,8 +41,10 @@ import com.google.maps.android.compose.rememberMarkerState
 
 @Composable
 fun MapScreen() {
-    val settingsViewModel: MapViewModel = viewModel()
     val context = LocalContext.current
+    val settingsViewModel: MapViewModel = viewModel()
+
+    settingsViewModel.initialize(context)
 
     var lastLat by remember { mutableDoubleStateOf(0.0) }
     var lastLon by remember { mutableDoubleStateOf(0.0) }

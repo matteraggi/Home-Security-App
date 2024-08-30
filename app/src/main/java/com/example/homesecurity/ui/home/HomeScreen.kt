@@ -1,4 +1,7 @@
+package com.example.homesecurity.ui.home
 
+import android.graphics.BitmapFactory
+import android.util.Base64
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -43,12 +47,6 @@ import androidx.navigation.NavController
 import com.amplifyframework.datastore.generated.model.Person
 import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.R
-import com.example.homesecurity.ui.home.HomeViewModel
-import com.example.homesecurity.ui.home.changeButtonState
-import com.example.homesecurity.ui.home.decodeBase64ToBitmap
-import com.example.homesecurity.ui.home.getCurrentUserId
-import com.example.homesecurity.ui.home.getHomePeople
-import com.example.homesecurity.ui.home.getUser
 import com.example.homesecurity.ui.record.RecordViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -220,13 +218,39 @@ fun PersonBox(person: Person) {
         modifier = Modifier
             .padding(8.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally){
-            Icon(
-                painterResource(id = R.drawable.ic_baseline_person_24),
-                contentDescription = null,
-                tint = if(person.inside) Color.Black else Color.Gray,
-                modifier = Modifier.size(80.dp))
-            Text(text = person.name, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.primary)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            if (person.photo != null && person.photo.isNotEmpty()) {
+                // Decodifica la stringa Base64 in un array di byte
+                val decodedBytes = Base64.decode(person.photo, Base64.DEFAULT)
+                // Converti l'array di byte in un Bitmap
+                val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+
+                // Converte il Bitmap in ImageBitmap e lo mostra come immagine rotonda
+                bitmap?.let {
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
+                            .fillMaxWidth()
+                    )
+                }
+            } else {
+                Icon(
+                    painterResource(id = R.drawable.ic_baseline_person_24),
+                    contentDescription = null,
+                    tint = Color.Black,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                )
+            }
+            Text(
+                text = person.name,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
@@ -286,3 +310,4 @@ fun RecordBox(timestamp: String, navController: NavController, photos: List<Stri
     }
     Spacer(modifier = Modifier.size(20.dp))
 }
+

@@ -1,6 +1,5 @@
 package com.example.homesecurity
 
-import HomeScreen
 import MapScreen
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -15,8 +14,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.homesecurity.ui.authentication.AuthScreen
 import com.example.homesecurity.ui.connectionwebview.ConnectionWebViewScreen
-import com.example.homesecurity.ui.createuser.CreateNewUserScreen
+import com.example.homesecurity.ui.createnewuser.CreateNewUserScreen
 import com.example.homesecurity.ui.createuser.CreateUserScreen
+import com.example.homesecurity.ui.home.HomeScreen
 import com.example.homesecurity.ui.live.LiveScreen
 import com.example.homesecurity.ui.record.RecordScreen
 import com.example.homesecurity.ui.settings.SettingsScreen

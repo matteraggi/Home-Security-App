@@ -16,6 +16,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -90,6 +91,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -118,6 +120,8 @@ class MainActivity : AppCompatActivity() {
         val geofenceId = sharedPreferences.getString("geofenceId", null)
         val savedLat = sharedPreferences.getFloat("geofenceLat", 0f)
         val savedLon = sharedPreferences.getFloat("geofenceLon", 0f)
+
+        mapViewModel.initialize(this)
 
         // Ripristina il Geofence se c'è già un Geofence salvato
         if (geofenceId != null && savedLat != 0f && savedLon != 0f) {
