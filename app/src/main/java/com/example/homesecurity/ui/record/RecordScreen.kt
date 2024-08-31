@@ -42,6 +42,7 @@ import java.util.Locale
 fun RecordScreen(navController: NavController) {
     val recordViewModel = viewModel<RecordViewModel>()
     val recordArray = recordViewModel.records.collectAsState()
+    val isLoading = recordViewModel.isLoading.collectAsState()
 
     LaunchedEffect(key1 = Unit) {
         recordViewModel.listRecords()
@@ -52,16 +53,33 @@ fun RecordScreen(navController: NavController) {
             .fillMaxSize()
             .padding(horizontal = 20.dp, vertical = 20.dp)
     ) {
-        LazyColumn {
-            recordArray.value?.let { recordsList ->
-                items(recordsList.size) { index ->
-                    val record = recordsList[index]
-                    RecordLine(timestamp = record.timestamp, navController = navController, photos = record.photoBase64)
+        if (isLoading.value) {
+            // Mostra lo spinner durante il caricamento
+            LoadingSpinner()
+        } else {
+            // Mostra la lista dei record una volta completato il caricamento
+            LazyColumn {
+                recordArray.value?.let { recordsList ->
+                    items(recordsList.size) { index ->
+                        val record = recordsList[index]
+                        RecordLine(timestamp = record.timestamp, navController = navController, photos = record.photoBase64)
+                    }
                 }
             }
         }
     }
 }
+
+@Composable
+fun LoadingSpinner() {
+    Box(
+        contentAlignment = androidx.compose.ui.Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        androidx.compose.material3.CircularProgressIndicator()
+    }
+}
+
 @Composable
 fun RecordLine(timestamp: String, navController: NavController, photos: List<String>) {
     val formattedDate = remember {

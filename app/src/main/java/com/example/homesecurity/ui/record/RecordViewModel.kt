@@ -10,10 +10,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlin.coroutines.suspendCoroutine
 
-class RecordViewModel : ViewModel()  {
+class RecordViewModel : ViewModel() {
 
     private val _records = MutableStateFlow<List<RecordData>?>(null)
     val records = _records.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false) // Stato di caricamento
+    val isLoading = _isLoading.asStateFlow()
 
     suspend fun listRecords(): List<RecordData> {
         val id = getCurrentUserId()
@@ -23,13 +26,15 @@ class RecordViewModel : ViewModel()  {
         }
         val recordList = mutableListOf<RecordData>() // Lista temporanea per memorizzare i dati
 
+        _isLoading.value = true // Avvia il caricamento
+
         return suspendCoroutine { continuation ->
             Amplify.API.query(
                 ModelQuery.list(RecordData::class.java, RecordData.USER.contains(id)),
                 { response ->
                     response.data.forEach { record ->
                         recordList.add(record)
-                        Log.i("Record","Record: $record")
+                        Log.i("Record", "Record: $record")
                     }
 
                     // Ordina la lista in base al timestamp in ordine decrescente
@@ -38,10 +43,13 @@ class RecordViewModel : ViewModel()  {
                     // Aggiorna lo StateFlow con la lista ordinata
                     _records.value = sortedList
 
+                    _isLoading.value = false // Fine del caricamento
+
                     continuation.resumeWith(Result.success(sortedList))
                 },
                 { exception ->
                     Log.e("Record", "Query failure", exception)
+                    _isLoading.value = false // Fine del caricamento in caso di errore
                     continuation.resumeWith(Result.failure(exception))
                 }
             )

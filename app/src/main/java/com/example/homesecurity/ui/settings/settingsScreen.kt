@@ -45,7 +45,6 @@ import com.amplifyframework.datastore.generated.model.Person
 import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.R
 import com.example.homesecurity.ui.home.getCurrentUserId
-import com.example.homesecurity.ui.home.getHomePeople
 
 @Composable
 fun SettingsScreen(navController: NavController) {
@@ -53,9 +52,11 @@ fun SettingsScreen(navController: NavController) {
     val peopleState = remember { mutableStateOf<List<Person>?>(null) }
     val selectedPersonIdState = remember { mutableStateOf(getSelectedPersonId(context)) }
     val settingsViewModel: SettingsViewModel = viewModel()
+    val isLoading = remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        peopleState.value = getHomePeople(getCurrentUserId())
+        peopleState.value = settingsViewModel.getHomePeople(getCurrentUserId())
+        isLoading.value = false
     }
 
     Scaffold(
@@ -87,58 +88,62 @@ fun SettingsScreen(navController: NavController) {
                     Text("riposiziona geofencing")
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-
-
                 Text(
                     fontWeight = FontWeight.Bold,
                     lineHeight = 20.sp,
                     text = "Seleziona il tuo utente:"
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    color = Color.Gray,
-                    fontSize = 12.sp,
-                    lineHeight = 13.sp,
-                    text = "Selezionare il tuo utente della casa serve a identificare chi è all'interno e chi è all'esterno dell'edificio"
-                )
 
-                LazyRow {
-                    peopleState.value?.let { people ->
-                        if (people.isNotEmpty()) {
-                            items(people.size) { index ->
-                                val person = people[index]
-                                val isSelected = person.id == selectedPersonIdState.value
+                if (isLoading.value) {
+                    // Mostra la rotella di caricamento
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(80.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        LoadingSpinner()
+                    }
+                } else {
+                    // Mostra la lista delle persone
+                    LazyRow {
+                        peopleState.value?.let { people ->
+                            if (people.isNotEmpty()) {
+                                items(people.size) { index ->
+                                    val person = people[index]
+                                    val isSelected = person.id == selectedPersonIdState.value
 
-                                PersonBox(
-                                    person = person,
-                                    isSelected = isSelected,
-                                    onClick = {
-                                        selectedPersonIdState.value = person.id
-                                        saveSelectedPersonId(context, person.id)
-                                    }
-                                )
+                                    PersonBox(
+                                        person = person,
+                                        isSelected = isSelected,
+                                        onClick = {
+                                            selectedPersonIdState.value = person.id
+                                            saveSelectedPersonId(context, person.id)
+                                        }
+                                    )
+                                }
                             }
                         }
-                    }
-                    item {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Column {
-                            Spacer(modifier = Modifier.height(30.dp))
-                            Box(
-                                modifier = Modifier
-                                    .size(50.dp)
-                                    .background(
-                                        colorResource(id = R.color.blue_medium),
-                                        CircleShape
+                        item {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                Spacer(modifier = Modifier.height(30.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .background(
+                                            colorResource(id = R.color.blue_medium),
+                                            CircleShape
+                                        )
+                                        .clickable { navController.navigate(NotBottomBarPages.CreateNewUser.route) }
+                                ) {
+                                    Text(
+                                        text = "+",
+                                        fontSize = 40.sp,
+                                        color = Color.White,
+                                        modifier = Modifier.align(Alignment.Center)
                                     )
-                                    .clickable { navController.navigate(NotBottomBarPages.CreateNewUser.route) }
-                            ) {
-                                Text(
-                                    text = "+",
-                                    fontSize = 40.sp,
-                                    color = Color.White,
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
+                                }
                             }
                         }
                     }
@@ -158,6 +163,7 @@ fun SettingsScreen(navController: NavController) {
                     lineHeight = 13.sp,
                     text = "Quando eliminerai il tuo Account perderai qualsiasi informazione. Creandone uno nuovo dovrai collegare nuovamente i dispositivi."
                 )
+
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Controlla se `user` è non-null prima di usare il pulsante elimina account
@@ -169,11 +175,36 @@ fun SettingsScreen(navController: NavController) {
                 ) {
                     Text("elimina account")
                 }
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    fontWeight = FontWeight.Bold,
+                    lineHeight = 20.sp,
+                    text = "Entra con un altro account:"
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.blue_medium)),
+                    onClick = {
+                        settingsViewModel.logOut()
+                    },
+                ) {
+                    Text("log out")
+                }
             }
         }
     )
 }
 
+@Composable
+fun LoadingSpinner() {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        androidx.compose.material3.CircularProgressIndicator()
+    }
+}
 
 
 @Composable

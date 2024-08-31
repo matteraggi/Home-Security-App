@@ -61,6 +61,7 @@ fun HomeScreen(navController: NavController) {
     val peopleState = remember { mutableStateOf<List<Person>?>(null) }
     val isLoading = remember { mutableStateOf(true) }
     val deviceConnected = remember { mutableStateOf(true) }
+    val peopleLoading = remember { mutableStateOf(true) } // Stato per il caricamento delle persone
 
     val buttonViewModel: HomeViewModel = viewModel()
     val recordViewModel: RecordViewModel = viewModel()
@@ -71,19 +72,26 @@ fun HomeScreen(navController: NavController) {
     val buttonText = if (buttonView.value) "ON" else "OFF"
 
     LaunchedEffect(Unit) {
-        //subscribeToUpdateUser(buttonViewModel)
         val user = getUser(getCurrentUserId())
+
         if (user.thingsIds.isNullOrEmpty()) {
             deviceConnected.value = false
         }
-        isLoading.value = false
-        peopleState.value = getHomePeople(user.id)
+
+        // Avvia il caricamento delle persone in background
+        CoroutineScope(Dispatchers.IO).launch {
+            peopleState.value = buttonViewModel.getHomePeople(user.id)
+            peopleLoading.value = false // Il caricamento delle persone è completato
+        }
+
         buttonViewModel.fetchButtonStateFromDatabase(user)
         recordViewModel.listRecords()
+
+        // Quando entrambi i caricamenti sono completati, nascondi lo spinner
+        isLoading.value = false
     }
 
-    if (isLoading.value) {
-        // Schermata di caricamento
+    if (isLoading.value || peopleLoading.value) { // Mostra lo spinner finché entrambi i caricamenti non sono terminati
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
@@ -112,7 +120,7 @@ fun HomeScreen(navController: NavController) {
                     Modifier.background(colorResource(id = R.color.white)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    LazyRow{
+                    LazyRow {
                         peopleState.value?.let { people ->
                             if (people.isNotEmpty()) {
                                 items(people.size) { index ->
@@ -123,7 +131,7 @@ fun HomeScreen(navController: NavController) {
                         }
                         item {
                             Spacer(modifier = Modifier.width(8.dp))
-                            Column{
+                            Column {
                                 Spacer(modifier = Modifier.height(30.dp))
                                 Box(
                                     modifier = Modifier
@@ -132,7 +140,7 @@ fun HomeScreen(navController: NavController) {
                                             colorResource(id = R.color.blue_medium),
                                             CircleShape
                                         )
-                                        .clickable { navController.navigate(NotBottomBarPages.CreateNewUser.route) }
+                                        .clickable { navController.navigate(NotBottomBarPages.CreateUser.route) }
                                 ) {
                                     Text(
                                         text = "+",
@@ -175,21 +183,6 @@ fun HomeScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.size(20.dp))
 
-                /*
-                Button(
-                    onClick = {
-                        navController.navigate(NotBottomBarPages.Live.route)
-                    },
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally),
-                ){
-                    Text("Live Camera")
-                }
-
-                Spacer(modifier = Modifier.size(20.dp))
-
-                 */
-
                 Text(
                     "Ultimi Record:",
                     modifier = Modifier.padding(vertical = 10.dp),
@@ -211,6 +204,7 @@ fun HomeScreen(navController: NavController) {
         }
     }
 }
+
 
 @Composable
 fun PersonBox(person: Person) {
