@@ -34,7 +34,7 @@ fun SingleRecordScreen(timestamp: String) {
     }
 
     val formattedDate = remember {
-        val sdf = SimpleDateFormat("HH:mm:ss dd-MM-yyyy", Locale.getDefault())
+        val sdf = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
         val date = Date(timestamp.toLong() * 1000)
         sdf.format(date)
     }

@@ -136,31 +136,58 @@ suspend fun changeButtonStateTo(state: Boolean) {
     }
 }
 
-suspend fun registerNFC(nfc: String) {
+suspend fun registerNFC(
+    nfc: String,
+    onSuccess: () -> Unit,
+    onError: (String) -> Unit
+) {
     val id = getCurrentUserId()
     if (id.isEmpty()) {
         Log.e("Amplify Alarm Mutation", "ID utente nullo o vuoto")
+        onError("ID utente nullo o vuoto")
         return
     }
 
     val user = getUser(id)
+    val newNFCList: MutableList<String> = user.nfc
 
-    val updatedUser = User.builder().alarm(user.alarm).nfc(nfc).email(user.email).deviceIds(user.deviceIds).updatedAt(user.updatedAt).thingsIds(user.thingsIds).pin(user.pin).id(id).build()
+    if (newNFCList.contains(nfc)) {
+        Log.i("Amplify Alarm Mutation", "L'NFC è già registrato: $nfc")
+        onError("L'NFC è già registrato")
+        return
+    }
+
+    newNFCList.add(nfc)
+
+    val updatedUser = User.builder()
+        .alarm(user.alarm)
+        .nfc(newNFCList)
+        .email(user.email)
+        .deviceIds(user.deviceIds)
+        .updatedAt(user.updatedAt)
+        .thingsIds(user.thingsIds)
+        .pin(user.pin)
+        .id(id)
+        .build()
 
     try {
         Amplify.API.mutate(
             ModelMutation.update(updatedUser),
             { _ ->
-                Log.i("Amplify Alarm Mutation", "Allarme aggiornato: $updatedUser")
+                Log.i("Amplify Alarm Mutation", "NFC aggiunto: $updatedUser")
+                onSuccess()
             },
             { error ->
                 Log.e("Amplify Alarm Mutation", "Errore durante l'aggiornamento dell'utente: $error")
+                onError("Errore durante l'aggiornamento dell'utente")
             }
         )
     } catch (e: Exception) {
         Log.e("Amplify Alarm Mutation", "Errore durante l'aggiornamento dell'utente: $e")
+        onError("Errore durante l'aggiornamento dell'utente")
     }
 }
+
 
 fun decodeBase64ToBitmap(base64Str: String): Bitmap? {
     return try {

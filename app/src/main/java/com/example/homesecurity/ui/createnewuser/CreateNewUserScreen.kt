@@ -55,8 +55,8 @@ fun CreateNewUserScreen(navController: NavController) {
     val coroutineScope = rememberCoroutineScope()
 
     val updateSuccess by createNewUserViewModel.updateSuccess.collectAsState()
+    val isLoading by createNewUserViewModel.isLoading.collectAsState()
 
-    // Gestione delle immagini
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -73,7 +73,6 @@ fun CreateNewUserScreen(navController: NavController) {
         contract = ActivityResultContracts.TakePicturePreview(),
         onResult = { bitmap: Bitmap? ->
             bitmap?.let {
-                // Converti il bitmap in un file temporaneo e ottieni l'URI
                 val tempFile = File.createTempFile("image", ".jpg")
                 FileOutputStream(tempFile).use { out ->
                     it.compress(Bitmap.CompressFormat.JPEG, 100, out)
@@ -107,7 +106,6 @@ fun CreateNewUserScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // RIGA PER L'IMMAGINE E IL CAMPO NOME
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -123,7 +121,6 @@ fun CreateNewUserScreen(navController: NavController) {
                                 .padding(end = 16.dp)
                         )
                     } else {
-                        // Placeholder quando non c'è un'immagine selezionata
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_person_24),
                             contentDescription = null,
@@ -138,13 +135,12 @@ fun CreateNewUserScreen(navController: NavController) {
                         onValueChange = { userName = it },
                         label = { Text("Nome") },
                         modifier = Modifier
-                            .weight(1f)  // Assicurati che occupi lo spazio rimanente nella riga
+                            .weight(1f)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // RIGA PER LE ICONE
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -154,7 +150,7 @@ fun CreateNewUserScreen(navController: NavController) {
 
                     IconButton(onClick = { galleryLauncher.launch("image/*") }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_dashboard_black_24dp),
+                            painter = painterResource(id = R.drawable.baseline_photo_library_24),
                             contentDescription = "Seleziona dalla galleria"
                         )
                     }
@@ -163,7 +159,7 @@ fun CreateNewUserScreen(navController: NavController) {
 
                     IconButton(onClick = { cameraLauncher.launch(null) }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.baseline_camera_indoor_24),
+                            painter = painterResource(id = R.drawable.baseline_photo_camera_24),
                             contentDescription = "Scatta una foto"
                         )
                     }
@@ -176,6 +172,11 @@ fun CreateNewUserScreen(navController: NavController) {
                     createNewUserViewModel.createPerson(context)
                 }) {
                     Text("Avanti")
+                }
+
+                if (isLoading) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(text = "Creando utente...", style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }

@@ -20,7 +20,7 @@ class RunningApp :Application(){
                 "Alert Notifications",
                 NotificationManager.IMPORTANCE_HIGH
             )
-            channel.description = "L'allarme è scattato! Torna subito a casa e spara al ladro"
+            channel.description = "L'allarme è scattato! Torna subito a casa!"
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }

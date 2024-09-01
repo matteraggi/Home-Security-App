@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.util.Base64
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -213,16 +215,6 @@ fun PersonBox(person: Person, isSelected: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .padding(8.dp)
             .clickable { onClick() }
-            .then(
-                if (isSelected) {
-                    Modifier.background(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                        shape = CircleShape
-                    )
-                } else {
-                    Modifier
-                }
-            )
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             if (person.photo != null && person.photo.isNotEmpty()) {
@@ -235,17 +227,28 @@ fun PersonBox(person: Person, isSelected: Boolean, onClick: () -> Unit) {
                         modifier = Modifier
                             .size(80.dp)
                             .clip(CircleShape)
-                            .fillMaxWidth()
+                            .border(
+                                width = if (isSelected) 5.dp else 0.dp,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                shape = CircleShape
+                            )
+                            .fillMaxWidth(),
+                        contentScale = ContentScale.Crop
                     )
                 }
             } else {
                 Icon(
-                    painterResource(id = R.drawable.ic_baseline_person_24),
+                    painter = painterResource(id = R.drawable.ic_baseline_person_24),
                     contentDescription = null,
                     tint = Color.Black,
                     modifier = Modifier
                         .size(80.dp)
                         .clip(CircleShape)
+                        .border(
+                            width = if (isSelected) 5.dp else 0.dp,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            shape = CircleShape
+                        )
                 )
             }
             Text(
@@ -256,6 +259,7 @@ fun PersonBox(person: Person, isSelected: Boolean, onClick: () -> Unit) {
         }
     }
 }
+
 
 
 fun saveSelectedPersonId(context: Context, personId: String) {

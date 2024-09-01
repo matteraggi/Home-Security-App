@@ -40,6 +40,7 @@ import com.amplifyframework.kotlin.core.Amplify
 import com.amplifyframework.ui.authenticator.enums.AuthenticatorStep
 import com.amplifyframework.ui.authenticator.rememberAuthenticatorState
 import com.amplifyframework.ui.authenticator.ui.Authenticator
+import com.example.homesecurity.ui.authentication.AuthViewModel
 import com.example.homesecurity.ui.home.getCurrentUserId
 import com.example.homesecurity.ui.home.getUser
 import com.example.homesecurity.ui.home.registerNFC
@@ -181,7 +182,7 @@ class MainActivity : AppCompatActivity() {
                 val userId = getCurrentUserId()
                 val user = getUser(userId)
 
-                if (user.nfc.isEmpty()) {
+                if (user.nfc.isNullOrEmpty()) {
                     runOnUiThread {
                         enableForegroundDispatch()
                     }
@@ -199,7 +200,7 @@ class MainActivity : AppCompatActivity() {
         disableForegroundDispatch()
     }
 
-    private fun enableForegroundDispatch() {
+    fun enableForegroundDispatch() {
         val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         if (nfcAdapter != null) {
             if (nfcAdapter.isEnabled) {
@@ -226,7 +227,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun disableForegroundDispatch() {
+    fun disableForegroundDispatch() {
         nfcAdapter?.disableForegroundDispatch(this)
     }
 
@@ -237,6 +238,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleNfcIntent(intent: Intent) {
+        val authViewModel: AuthViewModel by viewModels()
+
         if (intent.action == NfcAdapter.ACTION_TAG_DISCOVERED ||
             intent.action == NfcAdapter.ACTION_NDEF_DISCOVERED) {
 
@@ -247,8 +250,21 @@ class MainActivity : AppCompatActivity() {
                 val tagId = tag.id
                 val tagIdHex = tagId.joinToString(separator = "") { String.format("%02X", it) }
                 Log.d("NFC", "Tag ID: $tagIdHex")
+
                 CoroutineScope(Dispatchers.IO).launch {
-                    registerNFC(tagIdHex)
+                    registerNFC(tagIdHex,
+                        onSuccess = {
+                            runOnUiThread {
+                                Toast.makeText(this@MainActivity, "Tessera NFC registrata con successo", Toast.LENGTH_SHORT).show()
+                                authViewModel.dismissNFCDialog()
+                            }
+                        },
+                        onError = { errorMessage ->
+                            runOnUiThread {
+                                Toast.makeText(this@MainActivity, "Errore: $errorMessage", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    )
                 }
 
                 val ndef = Ndef.get(tag)
@@ -270,6 +286,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
 
 
 

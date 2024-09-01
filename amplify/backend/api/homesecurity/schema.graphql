@@ -32,6 +32,6 @@ type User @model @auth(rules: [{allow: public}]) {
   thingsIds: [String]
   pin: String
   email: String
-  nfc: String
+  nfc: [String]
 }
  

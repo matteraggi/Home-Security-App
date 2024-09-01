@@ -46,7 +46,7 @@ fun BottomNavGraph(navController: NavHostController, paddingValues: PaddingValue
         composable(route = BottomBarScreen.SmartObj.route) {
             SmartObjScreen(navController)
         }
-        composable(route = BottomBarScreen.Geofencing.route) {
+        composable(route = BottomBarScreen.Auth.route) {
             AuthScreen()
         }
         composable(

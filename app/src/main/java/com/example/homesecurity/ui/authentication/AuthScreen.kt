@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -27,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,17 +36,30 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.homesecurity.MainActivity
 import com.example.homesecurity.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun AuthScreen() {
+    val context = LocalContext.current
     val authViewModel: AuthViewModel = viewModel()
     val pin by authViewModel.pinValue.collectAsState(initial = "")
     val isPinVisible = remember { mutableStateOf(false) }
-    val nfc by authViewModel.savedNFC.collectAsState(initial = false)
+    val nfc by authViewModel.savedNFC.collectAsState(initial = 0)
+    val isLoading by authViewModel.isLoading.collectAsState()
 
     if (authViewModel.showSetPinDialog) {
         SetPinDialog(viewModel = authViewModel, onDismiss = { authViewModel.dismissSetPinDialog() })
+    }
+
+    if (authViewModel.showNFCDialog) {
+        SetNFCDialog(viewModel = authViewModel, onDismiss = {
+            authViewModel.dismissNFCDialog()
+            (context as MainActivity).disableForegroundDispatch()
+        })
     }
 
     Column(
@@ -53,85 +68,92 @@ fun AuthScreen() {
             .padding(vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Parte alta con due box/card
-        Row(
-            modifier = Modifier
-                .width(300.dp)
-                .padding(bottom = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            CardBoxWithIconAndNumber(iconResId = R.drawable.baseline_fingerprint_24, number = "0")
-            if(nfc){
-                CardBoxNFC(iconResId = R.drawable.baseline_nfc_24, colorResource(R.color.dark_green))
+        if (isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
-            else{
-                CardBoxNFC(iconResId = R.drawable.baseline_nfc_24, Color.Black)
-            }
-        }
-
-        Card(
-            modifier = Modifier
-                .width(300.dp)
-                .padding(bottom = 16.dp)
-                .clickable {
-                    if (pin.isNotEmpty()) {
-                        isPinVisible.value =
-                            !isPinVisible.value  // Inverti la visibilità del PIN al clic
-                    } else {
-                        authViewModel.showSetPinDialog()
-                    }
-                },
-            shape = RoundedCornerShape(8.dp),
-        ) {
+        } else {
+            // Contenuto normale da mostrare dopo il caricamento
             Row(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
+                    .width(300.dp)
+                    .padding(bottom = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "Pin", color = Color.Black, fontSize = 16.sp)
-                Text(
-                    text = if (pin.isEmpty()) {
-                        "Imposta il PIN"
-                    } else {
-                        if (isPinVisible.value) {
-                            pin  // Mostra il PIN effettivo
+                CardBoxWithIconAndNumber(iconResId = R.drawable.baseline_fingerprint_24, number = "0")
+                if (nfc > 0) {
+                    CardBoxNFC(iconResId = R.drawable.baseline_nfc_24, colorResource(R.color.dark_green), nfc)
+                } else {
+                    CardBoxNFC(iconResId = R.drawable.baseline_nfc_24, Color.Black, 0)
+                }
+            }
+
+            Card(
+                modifier = Modifier
+                    .width(300.dp)
+                    .padding(bottom = 16.dp)
+                    .clickable {
+                        if (pin.isNotEmpty()) {
+                            isPinVisible.value =
+                                !isPinVisible.value  // Inverti la visibilità del PIN al clic
                         } else {
-                            "*".repeat(pin.length)  // Mostra una stringa di asterischi della stessa lunghezza del PIN
+                            authViewModel.showSetPinDialog()
                         }
                     },
-                    color = Color.Black,
-                    fontSize = 16.sp
-                )
+                shape = RoundedCornerShape(8.dp),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "Pin", color = Color.Black, fontSize = 16.sp)
+                    Text(
+                        text = if (pin.isEmpty()) {
+                            "Imposta il PIN"
+                        } else {
+                            if (isPinVisible.value) {
+                                pin  // Mostra il PIN effettivo
+                            } else {
+                                "*".repeat(pin.length)  // Mostra una stringa di asterischi della stessa lunghezza del PIN
+                            }
+                        },
+                        color = Color.Black,
+                        fontSize = 16.sp
+                    )
+                }
             }
-        }
 
-        // Spazio verticale per distanziare
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        // Testo "Registra nuovo metodo di autenticazione"
-        Text(
-            text = "Registra nuovo metodo di autenticazione:",
-            fontSize = 20.sp,
-            color = Color.Black,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold
-        )
+            Text(
+                text = "Registra nuovo metodo di autenticazione:",
+                fontSize = 20.sp,
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold
+            )
 
-        // Spazio verticale per distanziare
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        // Parte inferiore con tre box/card in riga
-        Row(
-            modifier = Modifier.width(300.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            CardBoxWithIcon(iconResId = R.drawable.baseline_fingerprint_24){}
-            CardBoxWithIcon(iconResId = R.drawable.baseline_nfc_24){}
-            CardBoxWithText(text = "Cambia Pin")
+            Row(
+                modifier = Modifier.width(300.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                CardBoxWithIcon(iconResId = R.drawable.baseline_fingerprint_24) {}
+                CardBoxWithIcon(iconResId = R.drawable.baseline_nfc_24) {
+                    authViewModel.showNFCDialog()
+                    (context as MainActivity).enableForegroundDispatch()
+                }
+                CardBoxWithText(text = "Cambia Pin") {
+                    authViewModel.showSetPinDialog()
+                }
+            }
         }
     }
 }
+
 
 @Composable
 fun CardBoxWithIconAndNumber(iconResId: Int, number: String) {
@@ -160,7 +182,7 @@ fun CardBoxWithIconAndNumber(iconResId: Int, number: String) {
 }
 
 @Composable
-fun CardBoxNFC(iconResId: Int, color: Color) {
+fun CardBoxNFC(iconResId: Int, color: Color, number: Number) {
     Card(
         modifier = Modifier
             .width(140.dp)
@@ -180,6 +202,7 @@ fun CardBoxNFC(iconResId: Int, color: Color) {
                 tint = color,
                 modifier = Modifier.size(60.dp)
             )
+            Text(text = "$number", color = Color.Black, fontSize = 20.sp)
         }
     }
 }
@@ -209,11 +232,12 @@ fun CardBoxWithIcon(iconResId: Int, onClick: () -> Unit) {
 
 
 @Composable
-fun CardBoxWithText(text: String) {
+fun CardBoxWithText(text: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .width(120.dp)
-            .height(80.dp),
+            .height(80.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -224,6 +248,7 @@ fun CardBoxWithText(text: String) {
         }
     }
 }
+
 
 @Composable
 fun SetPinDialog(viewModel: AuthViewModel, onDismiss: () -> Unit) {
@@ -243,8 +268,10 @@ fun SetPinDialog(viewModel: AuthViewModel, onDismiss: () -> Unit) {
         },
         confirmButton = {
             Button(onClick = {
-                viewModel.setPin(newPin.value) // Imposta il nuovo PIN nel ViewModel
-                onDismiss()
+                CoroutineScope(Dispatchers.IO).launch {
+                    viewModel.setPin(newPin.value) // Imposta il nuovo PIN nel ViewModel
+                    onDismiss()
+                }
             }) {
                 Text("Conferma")
             }
@@ -252,6 +279,41 @@ fun SetPinDialog(viewModel: AuthViewModel, onDismiss: () -> Unit) {
         dismissButton = {
             Button(onClick = onDismiss) {
                 Text("Annulla")
+            }
+        }
+    )
+}
+
+@Composable
+fun SetNFCDialog(viewModel: AuthViewModel, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Avvicina la tessera NFC",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Immagine mostrata sotto il testo
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_nfc_24), // Usa l'id dell'immagine che desideri
+                    contentDescription = null,
+                    modifier = Modifier.size(100.dp) // Regola la dimensione dell'immagine
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                onDismiss()
+            }) {
+                Text("Chiudi")
             }
         }
     )

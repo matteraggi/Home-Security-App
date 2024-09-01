@@ -45,7 +45,7 @@ public final class User implements Model {
   private final @ModelField(targetType="String") List<String> thingsIds;
   private final @ModelField(targetType="String") String pin;
   private final @ModelField(targetType="String") String email;
-  private final @ModelField(targetType="String") String nfc;
+  private final @ModelField(targetType="String") List<String> nfc;
   /** @deprecated This API is internal to Amplify and should not be used. */
   @Deprecated
    public String resolveIdentifier() {
@@ -92,11 +92,11 @@ public final class User implements Model {
       return email;
   }
   
-  public String getNfc() {
+  public List<String> getNfc() {
       return nfc;
   }
   
-  private User(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin, String email, String nfc) {
+  private User(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin, String email, List<String> nfc) {
     this.id = id;
     this.alarm = alarm;
     this.deviceIds = deviceIds;
@@ -212,7 +212,7 @@ public final class User implements Model {
     BuildStep thingsIds(List<String> thingsIds);
     BuildStep pin(String pin);
     BuildStep email(String email);
-    BuildStep nfc(String nfc);
+    BuildStep nfc(List<String> nfc);
   }
   
 
@@ -225,12 +225,12 @@ public final class User implements Model {
     private List<String> thingsIds;
     private String pin;
     private String email;
-    private String nfc;
+    private List<String> nfc;
     public Builder() {
       
     }
     
-    private Builder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin, String email, String nfc) {
+    private Builder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin, String email, List<String> nfc) {
       this.id = id;
       this.alarm = alarm;
       this.deviceIds = deviceIds;
@@ -302,7 +302,7 @@ public final class User implements Model {
     }
     
     @Override
-     public BuildStep nfc(String nfc) {
+     public BuildStep nfc(List<String> nfc) {
         this.nfc = nfc;
         return this;
     }
@@ -319,7 +319,7 @@ public final class User implements Model {
   
 
   public final class CopyOfBuilder extends Builder {
-    private CopyOfBuilder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin, String email, String nfc) {
+    private CopyOfBuilder(String id, Boolean alarm, List<String> deviceIds, String updatedAt, String createdAt, List<String> thingsIds, String pin, String email, List<String> nfc) {
       super(id, alarm, deviceIds, updatedAt, createdAt, thingsIds, pin, email, nfc);
       Objects.requireNonNull(alarm);
     }
@@ -360,7 +360,7 @@ public final class User implements Model {
     }
     
     @Override
-     public CopyOfBuilder nfc(String nfc) {
+     public CopyOfBuilder nfc(List<String> nfc) {
       return (CopyOfBuilder) super.nfc(nfc);
     }
   }

@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,7 +51,9 @@ import com.example.homesecurity.R
 import com.example.homesecurity.ui.record.RecordViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -61,7 +64,8 @@ fun HomeScreen(navController: NavController) {
     val peopleState = remember { mutableStateOf<List<Person>?>(null) }
     val isLoading = remember { mutableStateOf(true) }
     val deviceConnected = remember { mutableStateOf(true) }
-    val peopleLoading = remember { mutableStateOf(true) } // Stato per il caricamento delle persone
+    val peopleLoading = remember { mutableStateOf(true) }
+    val isButtonLoading = remember { mutableStateOf(false) }  // Nuovo stato di caricamento per il pulsante
 
     val buttonViewModel: HomeViewModel = viewModel()
     val recordViewModel: RecordViewModel = viewModel()
@@ -78,26 +82,22 @@ fun HomeScreen(navController: NavController) {
             deviceConnected.value = false
         }
 
-        // Avvia il caricamento delle persone in background
         CoroutineScope(Dispatchers.IO).launch {
             peopleState.value = buttonViewModel.getHomePeople(user.id)
-            peopleLoading.value = false // Il caricamento delle persone è completato
+            peopleLoading.value = false
         }
 
         buttonViewModel.fetchButtonStateFromDatabase(user)
         recordViewModel.listRecords()
-
-        // Quando entrambi i caricamenti sono completati, nascondi lo spinner
         isLoading.value = false
     }
 
-    if (isLoading.value || peopleLoading.value) { // Mostra lo spinner finché entrambi i caricamenti non sono terminati
+    if (isLoading.value || peopleLoading.value) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
     } else {
         if (!deviceConnected.value) {
-            // Mostra un pulsante per navigare a un'altra pagina se l'array è vuoto
             Box(contentAlignment = Alignment.Center) {
                 Column {
                     Text(text = "Crea il tuo User e Connetti il tuo primo Device")
@@ -109,13 +109,11 @@ fun HomeScreen(navController: NavController) {
                 }
             }
         } else {
-            // Mostra la schermata originale se l'array contiene dati
             Column(
                 modifier = Modifier
                     .padding(horizontal = 20.dp, vertical = 10.dp)
                     .fillMaxSize()
             ) {
-                // People RecyclerView with Add Button
                 Row(
                     Modifier.background(colorResource(id = R.color.white)),
                     verticalAlignment = Alignment.CenterVertically
@@ -140,7 +138,7 @@ fun HomeScreen(navController: NavController) {
                                             colorResource(id = R.color.blue_medium),
                                             CircleShape
                                         )
-                                        .clickable { navController.navigate(NotBottomBarPages.CreateUser.route) }
+                                        .clickable { navController.navigate(NotBottomBarPages.CreateNewUser.route) }
                                 ) {
                                     Text(
                                         text = "+",
@@ -156,11 +154,19 @@ fun HomeScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.size(20.dp))
 
-                // Alarm Button
                 Button(
                     onClick = {
                         CoroutineScope(Dispatchers.IO).launch {
+                            isButtonLoading.value = true
+
+                            // Cambia lo stato del pulsante (ON/OFF)
                             changeButtonState(buttonViewModel)
+
+                            // Torna al thread principale per aggiornare lo stato della UI
+                            withContext(Dispatchers.Main) {
+                                delay(1000)
+                                isButtonLoading.value = false
+                            }
                         }
                     },
                     modifier = Modifier
@@ -169,15 +175,23 @@ fun HomeScreen(navController: NavController) {
                     shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
                 ) {
-                    Column {
-                        Icon(
-                            Icons.Default.PowerSettingsNew,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(75.dp)
-                                .align(Alignment.CenterHorizontally)
+                    if (isButtonLoading.value) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(50.dp),
+                            color = Color.White,
+                            strokeWidth = 4.dp
                         )
-                        Text(buttonText, fontSize = 25.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
+                    } else {
+                        Column {
+                            Icon(
+                                Icons.Default.PowerSettingsNew,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(75.dp)
+                                    .align(Alignment.CenterHorizontally)
+                            )
+                            Text(buttonText, fontSize = 25.sp, modifier = Modifier.align(Alignment.CenterHorizontally))
+                        }
                     }
                 }
 
@@ -189,7 +203,6 @@ fun HomeScreen(navController: NavController) {
                     fontSize = 20.sp
                 )
 
-                // Record RecyclerView
                 LazyRow(
                     Modifier.background(colorResource(id = R.color.white))
                 ) {
@@ -227,12 +240,13 @@ fun PersonBox(person: Person) {
                         modifier = Modifier
                             .size(80.dp)
                             .clip(CircleShape)
-                            .fillMaxWidth()
+                            .fillMaxWidth(),
+                        contentScale = ContentScale.Crop
                     )
                 }
             } else {
                 Icon(
-                    painterResource(id = R.drawable.ic_baseline_person_24),
+                    painter = painterResource(id = R.drawable.ic_baseline_person_24),
                     contentDescription = null,
                     tint = Color.Black,
                     modifier = Modifier
@@ -245,9 +259,23 @@ fun PersonBox(person: Person) {
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.primary
             )
+            if(person.inside){
+                Text(text = "in casa",
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    fontStyle = FontStyle.Italic
+                    )
+            }
+            else{
+                Text(text = "fuori",
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    fontStyle = FontStyle.Italic)
+            }
         }
     }
 }
+
 
 @Composable
 fun RecordBox(timestamp: String, navController: NavController, photos: List<String>) {

@@ -57,6 +57,7 @@ class CreateUserViewModel : ViewModel() {
                             } else {
                                 Log.i("CreatePerson", "Created Person with id: ${response.data.id}")
                                 _updateSuccess.value = true
+                                saveSelectedPersonId(context, response.data.id)
                                 addThingId(user, physicalPin)
                             }
                         },
@@ -70,6 +71,14 @@ class CreateUserViewModel : ViewModel() {
             } catch (error: Exception) {
                 Log.e("CreatePerson", "Failed to create person", error)
             }
+        }
+    }
+
+    private fun saveSelectedPersonId(context: Context, personId: String) {
+        val sharedPref = context.getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("selected_person_id", personId)
+            apply()
         }
     }
 

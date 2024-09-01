@@ -30,22 +30,25 @@ class CreateNewUserViewModel : ViewModel() {
     private val _updateSuccess = MutableStateFlow(false)
     val updateSuccess: StateFlow<Boolean> get() = _updateSuccess
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> get() = _isLoading
+
     fun createPerson(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.value = true
             try {
                 val user = getUser(getCurrentUserId())
 
                 val file = userImageUri?.let { getFileFromUri(context, it) }
 
                 if (file != null) {
-                    // Converti l'immagine in Base64 usando il file temporaneo
                     val base64Image = encodeImageToBase64(file)
 
                     val person = Person.builder()
                         .inside(true)
                         .name(userName)
                         .user(user)
-                        .photo(base64Image) // Assumendo che il modello Person abbia un campo per la stringa Base64 dell'immagine
+                        .photo(base64Image)
                         .build()
 
                     Amplify.API.mutate(
@@ -58,16 +61,44 @@ class CreateNewUserViewModel : ViewModel() {
                                 Log.i("CreatePerson", "Created Person with id: ${response.data.id}")
                                 _updateSuccess.value = true
                             }
+                            _isLoading.value = false
                         },
-                        { error -> Log.e("CreatePerson", "Create failed", error) }
+                        { error ->
+                            Log.e("CreatePerson", "Create failed", error)
+                            _isLoading.value = false
+                        }
                     )
 
                 } else {
-                    Log.e("CreatePerson", "Failed to create person")
+                    val person = Person.builder()
+                        .inside(true)
+                        .name(userName)
+                        .user(user)
+                        .photo("")
+                        .build()
+
+                    Amplify.API.mutate(
+                        ModelMutation.create(person),
+                        { response ->
+                            if (response.hasErrors()) {
+                                Log.e("CreatePerson", "Error: ${response.errors.first().message}")
+                                _updateSuccess.value = false
+                            } else {
+                                Log.i("CreatePerson", "Created Person with id: ${response.data.id}")
+                                _updateSuccess.value = true
+                            }
+                            _isLoading.value = false
+                        },
+                        { error ->
+                            Log.e("CreatePerson", "Create failed", error)
+                            _isLoading.value = false
+                        }
+                    )
                 }
 
             } catch (error: Exception) {
                 Log.e("CreatePerson", "Failed to create person", error)
+                _isLoading.value = false
             }
         }
     }

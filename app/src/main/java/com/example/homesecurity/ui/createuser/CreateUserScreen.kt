@@ -156,7 +156,7 @@ fun CreateUserScreen(navController: NavController) {
 
                     IconButton(onClick = { galleryLauncher.launch("image/*") }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_dashboard_black_24dp),
+                            painter = painterResource(id = R.drawable.baseline_photo_library_24),
                             contentDescription = "Seleziona dalla galleria"
                         )
                     }
@@ -165,7 +165,7 @@ fun CreateUserScreen(navController: NavController) {
 
                     IconButton(onClick = { cameraLauncher.launch(null) }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.baseline_camera_indoor_24),
+                            painter = painterResource(id = R.drawable.baseline_photo_camera_24),
                             contentDescription = "Scatta una foto"
                         )
                     }

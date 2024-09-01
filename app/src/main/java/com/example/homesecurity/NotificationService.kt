@@ -20,7 +20,7 @@ class NotificationService (private val context: Context) {
         val notification = NotificationCompat.Builder(context, ALARM_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notifications_black_24dp)
             .setContentTitle("È scattato l'allarme")
-            .setContentText("Torna a casa cazzo!")
+            .setContentText("Torna a casa!")
             .setContentIntent(activityPendingIntent)
             .build()
 
