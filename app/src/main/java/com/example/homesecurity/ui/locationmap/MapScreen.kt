@@ -1,8 +1,11 @@
+package com.example.homesecurity.ui.locationmap
 
 import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,11 +29,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.homesecurity.R
-import com.example.homesecurity.ui.locationmap.MapViewModel
 import com.example.homesecurity.ui.settings.REQUEST_LOCATION_PERMISSION
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
@@ -49,9 +54,9 @@ fun MapScreen() {
     var lastLat by remember { mutableDoubleStateOf(0.0) }
     var lastLon by remember { mutableDoubleStateOf(0.0) }
 
-    // Stato per gestire la posizione del geofence
+    // Usa solo una variabile per la posizione corrente e il geofence
     var geofenceLatLng by remember { mutableStateOf(LatLng(0.0, 0.0)) }
-    val geofenceRadius = 20.0 // Raggio del geofence
+    val geofenceRadius = 75.0
 
     val fusedLocationClient = remember {
         LocationServices.getFusedLocationProviderClient(context)
@@ -90,11 +95,13 @@ fun MapScreen() {
                 if (location != null) {
                     lastLat = location.latitude
                     lastLon = location.longitude
-                    cameraPositionState.position = CameraPosition.fromLatLngZoom(LatLng(lastLat, lastLon), 15f)
+
+                    // Aggiorna la posizione del geofence e il marker insieme
+                    geofenceLatLng = LatLng(lastLat, lastLon)
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(geofenceLatLng, 15f)
                 }
             }
 
-            // Recupera la posizione del geofence salvata
             val sharedPreferences = context.getSharedPreferences("GeofencePrefs", Context.MODE_PRIVATE)
             val savedGeofenceLat = sharedPreferences.getFloat("geofenceLat", 0f).toDouble()
             val savedGeofenceLon = sharedPreferences.getFloat("geofenceLon", 0f).toDouble()
@@ -107,16 +114,16 @@ fun MapScreen() {
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState
         ) {
-            // Marker for the current location
             if (lastLat != 0.0 && lastLon != 0.0) {
-                val currentMarkerState = rememberMarkerState(position = LatLng(lastLat, lastLon))
+                // Usa geofenceLatLng per il marker della posizione attuale
+                val currentMarkerState = rememberMarkerState(position = geofenceLatLng)
                 Marker(
                     state = currentMarkerState,
                     title = "Current Location",
+                    icon = bitmapDescriptorFromVector(context, R.drawable.ic_baseline_person_24)
                 )
             }
 
-            // Marker and Circle for the geofence location
             if (geofenceLatLng.latitude != 0.0 && geofenceLatLng.longitude != 0.0) {
                 val geofenceMarkerState = rememberMarkerState(position = geofenceLatLng)
                 Marker(
@@ -164,10 +171,9 @@ fun MapScreen() {
                         lastLat = location.latitude
                         lastLon = location.longitude
 
-                        // Aggiorna subito lo stato del geofence
+                        // Aggiorna geofenceLatLng che aggiornerà sia il cerchio che il marker
                         geofenceLatLng = LatLng(lastLat, lastLon)
 
-                        // Salva il nuovo geofence nelle SharedPreferences e aggiorna il ViewModel
                         settingsViewModel.updateGeofence(context, lastLat, lastLon)
 
                         Toast.makeText(
@@ -176,7 +182,6 @@ fun MapScreen() {
                             Toast.LENGTH_LONG
                         ).show()
 
-                        // Centra la mappa sulla nuova posizione del geofence
                         cameraPositionState.position = CameraPosition.fromLatLngZoom(geofenceLatLng, 15f)
                     } else {
                         Toast.makeText(
@@ -190,5 +195,24 @@ fun MapScreen() {
         ) {
             Text("Imposta nuova posizione")
         }
+    }
+}
+
+
+fun bitmapDescriptorFromVector(context: Context, vectorResId: Int, scaleFactor: Float = 1.5f): BitmapDescriptor? {
+    return ContextCompat.getDrawable(context, vectorResId)?.let { vectorDrawable ->
+        // Imposta le dimensioni originali
+        val width = (vectorDrawable.intrinsicWidth * scaleFactor).toInt()
+        val height = (vectorDrawable.intrinsicHeight * scaleFactor).toInt()
+
+        vectorDrawable.setBounds(0, 0, width, height)
+
+        // Crea un bitmap con le dimensioni ridimensionate
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        vectorDrawable.draw(canvas)
+
+        // Restituisce il bitmap come BitmapDescriptor
+        BitmapDescriptorFactory.fromBitmap(bitmap)
     }
 }

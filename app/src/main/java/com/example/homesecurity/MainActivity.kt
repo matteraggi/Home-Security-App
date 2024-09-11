@@ -56,6 +56,12 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
+    //! to do:
+
+    // cambiare nome app
+    // cambiare desing schermata scanner wi-fi (no bssid p.e.)
+    // schermata auth tutto alla stessa larghezza
+
     // Modifica il callback per gestire la richiesta del permesso di accesso alla posizione in background
     private val requestPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -222,7 +228,7 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             Log.d("NFC", "NFC is not supported on this device")
-            //Toast.makeText(this, "NFC not supported on this device", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "NFC not supported on this device", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -237,6 +243,7 @@ class MainActivity : AppCompatActivity() {
         handleNfcIntent(intent)
     }
 
+    @Suppress("DEPRECATION")
     private fun handleNfcIntent(intent: Intent) {
         val authViewModel: AuthViewModel by viewModels()
 
@@ -339,7 +346,7 @@ class MainActivity : AppCompatActivity() {
                     val user = getUser(userId)
 
                     // Controlla se il campo nfc è vuoto
-                    if (user.nfc.isEmpty()) {
+                    if (user.nfc.isNullOrEmpty()) {
                         Log.d("NFC", "Il campo NFC dell'utente è vuoto. Attivazione della ricerca NFC.")
                         // Attiva la ricerca NFC
                         runOnUiThread {

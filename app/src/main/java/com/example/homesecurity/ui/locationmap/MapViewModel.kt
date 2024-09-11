@@ -42,8 +42,6 @@ class MapViewModel : ViewModel() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             )
         }
-
-        // Remove the current geofence if it exists
         currentGeofenceId?.let { geofenceId ->
             geofencingClient.removeGeofences(listOf(geofenceId)).run {
                 addOnSuccessListener {
@@ -57,7 +55,7 @@ class MapViewModel : ViewModel() {
 
         geofenceList.add(Geofence.Builder()
             .setRequestId("GEOFENCE_ID")
-            .setCircularRegion(lat, lon, 20f)
+            .setCircularRegion(lat, lon, 75f)
             .setExpirationDuration(Geofence.NEVER_EXPIRE)
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
             .build())

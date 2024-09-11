@@ -1,6 +1,5 @@
 package com.example.homesecurity
 
-import MapScreen
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,6 +17,7 @@ import com.example.homesecurity.ui.createnewuser.CreateNewUserScreen
 import com.example.homesecurity.ui.createuser.CreateUserScreen
 import com.example.homesecurity.ui.home.HomeScreen
 import com.example.homesecurity.ui.live.LiveScreen
+import com.example.homesecurity.ui.locationmap.MapScreen
 import com.example.homesecurity.ui.record.RecordScreen
 import com.example.homesecurity.ui.settings.SettingsScreen
 import com.example.homesecurity.ui.singlerecord.SingleRecordScreen

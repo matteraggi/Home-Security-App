@@ -38,6 +38,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -65,7 +66,6 @@
                 android:name="android.nfc.cardemulation.host_apdu_service"
                 android:resource="@xml/hce_service" />
         </service>
-
 
         <receiver android:name=".GeofenceReceiver"
             android:exported="true"

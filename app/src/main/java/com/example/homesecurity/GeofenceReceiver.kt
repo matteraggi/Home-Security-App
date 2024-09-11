@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.widget.Toast
 import com.example.homesecurity.ui.home.changeButtonStateTo
 import com.example.homesecurity.ui.home.changePersonInside
 import com.google.android.gms.location.Geofence
@@ -20,11 +19,9 @@ class GeofenceReceiver : BroadcastReceiver() {
 
         if (intent != null) {
             Log.d("GEOFENCING", "Intent action: ${intent.action}")
-        }
-        if (intent != null) {
             Log.d("GEOFENCING", "Intent extras: ${intent.extras}")
-        }
 
+        }
         val geofencingEvent = intent?.let { GeofencingEvent.fromIntent(it) }
         if (geofencingEvent != null) {
             if (geofencingEvent.hasError()) {
@@ -38,25 +35,14 @@ class GeofenceReceiver : BroadcastReceiver() {
         // Get the transition type.
         val geofenceTransition = geofencingEvent?.geofenceTransition
 
-        // Test that the reported transition was of interest.
-        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
-            geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
 
-            // Get the geofences that were triggered. A single event can trigger multiple geofences.
-            val triggeringGeofences = geofencingEvent.triggeringGeofences
-
-            // Get the transition details as a String.
-            val geofenceDetails = triggeringGeofences?.joinToString { it.requestId }
-            Toast.makeText(context, geofenceDetails, Toast.LENGTH_LONG).show()
-
-            if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                if (context != null) {
-                    handleGeofenceExit(context)
-                }
-            } else {
-                if (context != null) {
-                    handleGeofenceEnter(context)
-                }
+        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+            if (context != null) {
+                handleGeofenceExit(context)
+            }
+        } else {
+            if (context != null) {
+                handleGeofenceEnter(context)
             }
         }
     }

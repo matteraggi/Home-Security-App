@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.amplifyframework.datastore.generated.model.Person
+import com.example.homesecurity.BottomBarScreen
 import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.R
 import com.example.homesecurity.ui.record.RecordViewModel
@@ -213,6 +214,17 @@ fun HomeScreen(navController: NavController) {
                         }
                     }
                 }
+                Text(
+                    text = "vedi tutti i record >>",
+                    modifier = Modifier
+                        .padding(vertical = 10.dp)
+                        .clickable {
+                            navController.navigate(BottomBarScreen.Record.route)
+                        },
+                    fontSize = 13.sp,
+                    color = colorResource(id = R.color.blue_medium),
+                    fontStyle = FontStyle.Italic
+                )
             }
         }
     }

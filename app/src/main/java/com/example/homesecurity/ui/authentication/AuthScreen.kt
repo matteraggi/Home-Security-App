@@ -56,7 +56,7 @@ fun AuthScreen() {
     }
 
     if (authViewModel.showNFCDialog) {
-        SetNFCDialog(viewModel = authViewModel, onDismiss = {
+        SetNFCDialog(onDismiss = {
             authViewModel.dismissNFCDialog()
             (context as MainActivity).disableForegroundDispatch()
         })
@@ -285,7 +285,7 @@ fun SetPinDialog(viewModel: AuthViewModel, onDismiss: () -> Unit) {
 }
 
 @Composable
-fun SetNFCDialog(viewModel: AuthViewModel, onDismiss: () -> Unit) {
+fun SetNFCDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -293,27 +293,32 @@ fun SetNFCDialog(viewModel: AuthViewModel, onDismiss: () -> Unit) {
                 text = "Avvicina la tessera NFC",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth() // Per assicurarti che il testo sia centrato
             )
         },
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp), // Spaziatura per migliorare l'aspetto
+                horizontalAlignment = Alignment.CenterHorizontally // Centra tutto all'interno della colonna
             ) {
-                // Immagine mostrata sotto il testo
                 Icon(
-                    painter = painterResource(id = R.drawable.baseline_nfc_24), // Usa l'id dell'immagine che desideri
+                    painter = painterResource(id = R.drawable.baseline_nfc_24),
                     contentDescription = null,
-                    modifier = Modifier.size(100.dp) // Regola la dimensione dell'immagine
+                    modifier = Modifier.size(100.dp)
                 )
             }
         },
         confirmButton = {
-            Button(onClick = {
-                onDismiss()
-            }) {
-                Text("Chiudi")
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center // Centra il bottone
+            ) {
+                Button(onClick = onDismiss) {
+                    Text("Chiudi")
+                }
             }
         }
     )
