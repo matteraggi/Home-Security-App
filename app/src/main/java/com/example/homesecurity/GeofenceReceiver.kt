@@ -50,12 +50,14 @@ class GeofenceReceiver : BroadcastReceiver() {
     private fun handleGeofenceExit(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
             changePersonInside(context, false)
-            /*
+/*
             val people = getHomePeople(getCurrentUserId())
             val anyInside = people.any { it.inside }
 
-            if (!anyInside) {*/
+            if (!anyInside) {
                 // If no persons inside, activate the alarm
+
+ */
                 changeButtonStateTo(true)
             //}
         }

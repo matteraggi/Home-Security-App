@@ -7,8 +7,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,11 +25,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +52,7 @@ import com.amplifyframework.datastore.generated.model.Person
 import com.example.homesecurity.NotBottomBarPages
 import com.example.homesecurity.R
 import com.example.homesecurity.ui.home.getCurrentUserId
+import com.example.homesecurity.ui.locationmap.MapViewModel
 
 @Composable
 fun SettingsScreen(navController: NavController) {
@@ -55,10 +61,14 @@ fun SettingsScreen(navController: NavController) {
     val selectedPersonIdState = remember { mutableStateOf(getSelectedPersonId(context)) }
     val settingsViewModel: SettingsViewModel = viewModel()
     val isLoading = remember { mutableStateOf(true) }
+    var isGeofenceEnabled by remember { mutableStateOf(true) }
+    val mapViewModel: MapViewModel = viewModel()
+
 
     LaunchedEffect(Unit) {
         peopleState.value = settingsViewModel.getHomePeople(getCurrentUserId())
         isLoading.value = false
+        isGeofenceEnabled = mapViewModel.isGeofenceEnabled(context)
     }
 
     Scaffold(
@@ -69,11 +79,37 @@ fun SettingsScreen(navController: NavController) {
                     .padding(padding)
                     .padding(16.dp)
             ) {
-                Text(
-                    fontWeight = FontWeight.Bold,
-                    lineHeight = 20.sp,
-                    text = "Vuoi impostare una nuova posizione per la tua casa?"
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Gestisci Geofence",
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 20.sp,
+                        modifier = Modifier
+                            .weight(1f)
+                    )
+
+                    Switch(
+                        checked = isGeofenceEnabled,
+                        onCheckedChange = { isChecked ->
+                            isGeofenceEnabled = isChecked
+                            if (isChecked) {
+                                mapViewModel.saveGeofenceState(context, true)
+                                mapViewModel.restoreGeofence(context)
+                            } else {
+                                mapViewModel.disableGeofence(context)
+                                mapViewModel.saveGeofenceState(context, false)
+                            }
+                        },
+                        modifier = Modifier
+                            .weight(0.4f)
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     color = Color.Gray,
@@ -90,6 +126,7 @@ fun SettingsScreen(navController: NavController) {
                     Text("riposiziona geofencing")
                 }
                 Spacer(modifier = Modifier.height(20.dp))
+
                 Text(
                     fontWeight = FontWeight.Bold,
                     lineHeight = 20.sp,
@@ -157,13 +194,6 @@ fun SettingsScreen(navController: NavController) {
                     fontWeight = FontWeight.Bold,
                     lineHeight = 20.sp,
                     text = "Vuoi eliminare il tuo Account?"
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    color = Color.Gray,
-                    fontSize = 12.sp,
-                    lineHeight = 13.sp,
-                    text = "Quando eliminerai il tuo Account perderai qualsiasi informazione. Creandone uno nuovo dovrai collegare nuovamente i dispositivi."
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))

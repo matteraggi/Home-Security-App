@@ -56,10 +56,9 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    //! to do:
+    //! design to do:
 
-    // cambiare nome app
-    // cambiare desing schermata scanner wi-fi (no bssid p.e.)
+    // cambiare desing schermata scanner wi-fi
     // schermata auth tutto alla stessa larghezza
 
     // Modifica il callback per gestire la richiesta del permesso di accesso alla posizione in background
@@ -144,6 +143,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Please enable NFC", Toast.LENGTH_SHORT).show()
         }
 
+        initNFCFunction()
 
         setContent {
             val authenticatorState = rememberAuthenticatorState(
@@ -196,6 +196,10 @@ class MainActivity : AppCompatActivity() {
             } catch (error: AuthException) {
                 Log.e("onResume", "Failed to get current user", error)
             }
+        }
+
+        if (nfcAdapter?.isEnabled == true) {
+            initService()
         }
     }
 
@@ -388,6 +392,29 @@ class MainActivity : AppCompatActivity() {
                 Log.e("checkAndUpdateDeviceId", "Failed to get current user", error)
             }
         }
+    }
+
+    private fun initNFCFunction() {
+        if (supportNfcHceFeature()) {
+            initService()
+        }
+    }
+
+    private fun supportNfcHceFeature() =
+        checkNFCEnable() && packageManager.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)
+
+    private fun checkNFCEnable(): Boolean {
+        return if (nfcAdapter == null) {
+            false
+        } else {
+            nfcAdapter?.isEnabled == true
+        }
+    }
+
+    private fun initService() {
+        val intent = Intent(this@MainActivity, MyHostApduService::class.java)
+        intent.putExtra("ndefMessage", "id")
+        startService(intent)
     }
 }
 

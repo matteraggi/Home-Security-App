@@ -17,6 +17,8 @@ class MapViewModel : ViewModel() {
     private lateinit var geofencingClient: GeofencingClient
     private val geofenceList = mutableListOf<Geofence>()
     private var currentGeofenceId: String? = null
+    private var isGeofenceActive = false
+
 
     fun initialize(context: Context) {
         if (!::fusedLocationClient.isInitialized) {
@@ -25,6 +27,11 @@ class MapViewModel : ViewModel() {
         if (!::geofencingClient.isInitialized) {
             geofencingClient = LocationServices.getGeofencingClient(context)
         }
+    }
+
+    fun isGeofenceEnabled(context: Context): Boolean {
+        val sharedPreferences = context.getSharedPreferences("GeofencePrefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getBoolean("geofenceEnabled", true)
     }
 
     fun updateGeofence(context: Context, lat: Double, lon: Double) {
@@ -70,6 +77,8 @@ class MapViewModel : ViewModel() {
                 Log.d("GeofencingViewModel", "Geofence added successfully: ${lat.toFloat()}, ${lon.toFloat()}")
                 currentGeofenceId = geofenceList[0].requestId
 
+                isGeofenceActive = true
+
                 val sharedPreferences = context.getSharedPreferences("GeofencePrefs", Context.MODE_PRIVATE)
                 sharedPreferences.edit().putString("geofenceId", currentGeofenceId).apply()
                 sharedPreferences.edit().putFloat("geofenceLat", lat.toFloat()).apply()
@@ -79,6 +88,41 @@ class MapViewModel : ViewModel() {
                 Log.d("GeofencingViewModel", "Failed to add geofence", it)
             }
         }
+    }
+
+    fun restoreGeofence(context: Context) {
+        val sharedPreferences = context.getSharedPreferences("GeofencePrefs", Context.MODE_PRIVATE)
+        val lat = sharedPreferences.getFloat("geofenceLat", 0f).toDouble()
+        val lon = sharedPreferences.getFloat("geofenceLon", 0f).toDouble()
+
+        if (lat != 0.0 && lon != 0.0) {
+            updateGeofence(context, lat, lon) // Riattiva il geofence con i valori salvati
+        } else {
+            Log.e("GeofencingViewModel", "No geofence coordinates saved")
+        }
+    }
+
+
+
+    fun disableGeofence(context: Context) {
+        currentGeofenceId?.let { geofenceId ->
+            geofencingClient.removeGeofences(listOf(geofenceId)).run {
+                addOnSuccessListener {
+                    Log.d("GeofencingViewModel", "Geofence disabled successfully")
+                    isGeofenceActive = false
+                    saveGeofenceState(context, false)
+                }
+                addOnFailureListener {
+                    Log.d("GeofencingViewModel", "Failed to disable geofence")
+                }
+            }
+        }
+    }
+
+    // Salva lo stato del geofence nelle SharedPreferences
+    fun saveGeofenceState(context: Context, isActive: Boolean) {
+        val sharedPreferences = context.getSharedPreferences("GeofencePrefs", Context.MODE_PRIVATE)
+        sharedPreferences.edit().putBoolean("geofenceEnabled", isActive).apply()
     }
 
     override fun onCleared() {

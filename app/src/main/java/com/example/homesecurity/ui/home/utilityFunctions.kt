@@ -245,3 +245,4 @@ suspend fun changePersonInside(context: Context, state: Boolean){
         Log.e("Amplify Alarm Mutation", "Errore durante l'aggiornamento dell'utente: $e")
     }
 }
+

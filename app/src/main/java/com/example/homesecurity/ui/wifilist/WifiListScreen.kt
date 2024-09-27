@@ -71,10 +71,6 @@ fun WifiListScreen(navController: NavController) {
                             text = "SSID: ${wifi.ssid}",
                             style = MaterialTheme.typography.bodyMedium
                         )
-                        Text(
-                            text = "BSSID: ${wifi.bssid}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
                     }
                 }
             }

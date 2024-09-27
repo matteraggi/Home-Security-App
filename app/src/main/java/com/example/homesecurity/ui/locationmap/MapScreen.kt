@@ -54,7 +54,6 @@ fun MapScreen() {
     var lastLat by remember { mutableDoubleStateOf(0.0) }
     var lastLon by remember { mutableDoubleStateOf(0.0) }
 
-    // Usa solo una variabile per la posizione corrente e il geofence
     var geofenceLatLng by remember { mutableStateOf(LatLng(0.0, 0.0)) }
     val geofenceRadius = 75.0
 
@@ -95,10 +94,7 @@ fun MapScreen() {
                 if (location != null) {
                     lastLat = location.latitude
                     lastLon = location.longitude
-
-                    // Aggiorna la posizione del geofence e il marker insieme
-                    geofenceLatLng = LatLng(lastLat, lastLon)
-                    cameraPositionState.position = CameraPosition.fromLatLngZoom(geofenceLatLng, 15f)
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(LatLng(lastLat, lastLon), 15f)
                 }
             }
 
@@ -115,8 +111,7 @@ fun MapScreen() {
             cameraPositionState = cameraPositionState
         ) {
             if (lastLat != 0.0 && lastLon != 0.0) {
-                // Usa geofenceLatLng per il marker della posizione attuale
-                val currentMarkerState = rememberMarkerState(position = geofenceLatLng)
+                val currentMarkerState = rememberMarkerState(position = LatLng(lastLat, lastLon))
                 Marker(
                     state = currentMarkerState,
                     title = "Current Location",
@@ -171,7 +166,6 @@ fun MapScreen() {
                         lastLat = location.latitude
                         lastLon = location.longitude
 
-                        // Aggiorna geofenceLatLng che aggiornerà sia il cerchio che il marker
                         geofenceLatLng = LatLng(lastLat, lastLon)
 
                         settingsViewModel.updateGeofence(context, lastLat, lastLon)
@@ -197,7 +191,6 @@ fun MapScreen() {
         }
     }
 }
-
 
 fun bitmapDescriptorFromVector(context: Context, vectorResId: Int, scaleFactor: Float = 1.5f): BitmapDescriptor? {
     return ContextCompat.getDrawable(context, vectorResId)?.let { vectorDrawable ->

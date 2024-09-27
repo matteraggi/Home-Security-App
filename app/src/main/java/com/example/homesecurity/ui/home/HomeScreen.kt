@@ -153,7 +153,7 @@ fun HomeScreen(navController: NavController) {
                     }
                 }
 
-                Spacer(modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.size(40.dp))
 
                 Button(
                     onClick = {
@@ -196,7 +196,7 @@ fun HomeScreen(navController: NavController) {
                     }
                 }
 
-                Spacer(modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.size(40.dp))
 
                 Text(
                     "Ultimi Record:",
@@ -309,13 +309,13 @@ fun RecordBox(timestamp: String, navController: NavController, photos: List<Stri
 
     Card(
         onClick = { navController.navigate(NotBottomBarPages.SingleRecord.withArgs(timestamp)) },
-        modifier = Modifier.size(width = 100.dp, height = 200.dp),
+        modifier = Modifier.width(width = 100.dp),
     ) {
         Column(
             modifier = Modifier.padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = formattedDate, textAlign = TextAlign.Center, fontSize = 12.sp)
+            Text(text = formattedDate, textAlign = TextAlign.Center, fontSize = 10.sp)
             Spacer(modifier = Modifier.height(8.dp))
 
             if (bitmap != null) {
@@ -339,7 +339,7 @@ fun RecordBox(timestamp: String, navController: NavController, photos: List<Stri
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = formattedTime, textAlign = TextAlign.Center, fontSize = 12.sp)
+            Text(text = formattedTime, textAlign = TextAlign.Center, fontSize = 10.sp)
         }
     }
     Spacer(modifier = Modifier.size(20.dp))
