@@ -78,9 +78,7 @@ fun AuthScreen() {
                 modifier = Modifier
                     .width(300.dp)
                     .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                CardBoxWithIconAndNumber(iconResId = R.drawable.baseline_fingerprint_24, number = "0")
                 if (nfc > 0) {
                     CardBoxNFC(iconResId = R.drawable.baseline_nfc_24, colorResource(R.color.dark_green), nfc)
                 } else {
@@ -108,7 +106,7 @@ fun AuthScreen() {
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "Pin", color = Color.Black, fontSize = 16.sp)
+                    Text(text = "Pin", color = Color.Black, fontSize = 24.sp, fontWeight = FontWeight.Bold)
                     Text(
                         text = if (pin.isEmpty()) {
                             "Imposta il PIN"
@@ -120,7 +118,7 @@ fun AuthScreen() {
                             }
                         },
                         color = Color.Black,
-                        fontSize = 16.sp
+                        fontSize = 24.sp, fontWeight = FontWeight.Bold
                     )
                 }
             }
@@ -128,7 +126,7 @@ fun AuthScreen() {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Registra nuovo metodo di autenticazione:",
+                text = "Nuovo metodo di autenticazione?",
                 fontSize = 20.sp,
                 color = Color.Black,
                 textAlign = TextAlign.Center,
@@ -141,7 +139,6 @@ fun AuthScreen() {
                 modifier = Modifier.width(300.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                CardBoxWithIcon(iconResId = R.drawable.baseline_fingerprint_24) {}
                 CardBoxWithIcon(iconResId = R.drawable.baseline_nfc_24) {
                     authViewModel.showNFCDialog()
                     (context as MainActivity).enableForegroundDispatch()
@@ -155,46 +152,21 @@ fun AuthScreen() {
 }
 
 
-@Composable
-fun CardBoxWithIconAndNumber(iconResId: Int, number: String) {
-    Card(
-        modifier = Modifier
-            .width(140.dp)
-            .height(140.dp),
-        shape = RoundedCornerShape(8.dp),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                painter = painterResource(id = iconResId),
-                contentDescription = null,
-                tint = Color.Black,
-                modifier = Modifier.size(60.dp)
-            )
-            Text(text = number, color = Color.Black, fontSize = 20.sp)
-        }
-    }
-}
 
 @Composable
 fun CardBoxNFC(iconResId: Int, color: Color, number: Number) {
     Card(
         modifier = Modifier
-            .width(140.dp)
-            .height(140.dp),
+            .height(120.dp),
         shape = RoundedCornerShape(8.dp),
-    ) {
-        Column(
+
+        ) {
+        Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 painter = painterResource(id = iconResId),
@@ -202,7 +174,10 @@ fun CardBoxNFC(iconResId: Int, color: Color, number: Number) {
                 tint = color,
                 modifier = Modifier.size(60.dp)
             )
-            Text(text = "$number", color = Color.Black, fontSize = 20.sp)
+            Column {
+                Text(text = "$number  NFC", color = Color.Black, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                Text(text = "registrati", color = Color.Black, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -211,9 +186,9 @@ fun CardBoxNFC(iconResId: Int, color: Color, number: Number) {
 fun CardBoxWithIcon(iconResId: Int, onClick: () -> Unit) {
     Card(
         modifier = Modifier
-            .width(80.dp)
+            .width(120.dp)
             .height(80.dp)
-            .clickable { onClick() },  // Aggiungi onClick
+            .clickable { onClick() },
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(
@@ -235,7 +210,7 @@ fun CardBoxWithIcon(iconResId: Int, onClick: () -> Unit) {
 fun CardBoxWithText(text: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
-            .width(120.dp)
+            .width(160.dp)
             .height(80.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(8.dp),

@@ -56,9 +56,6 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    //! design to do:
-
-    // cambiare desing schermata scanner wi-fi
     // schermata auth tutto alla stessa larghezza
 
     // Modifica il callback per gestire la richiesta del permesso di accesso alla posizione in background
